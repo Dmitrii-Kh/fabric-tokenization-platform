@@ -1,5 +1,5 @@
-const StudentRecordsStorageContract = require('./student-records-storage');
+const TokenizationPlatformStorageContract = require('./tokenization-platform-storage');
 
 module.exports = {
-  StudentRecordsStorageContract
+  TokenizationPlatformStorageContract
 };

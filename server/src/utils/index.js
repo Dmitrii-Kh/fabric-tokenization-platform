@@ -46,8 +46,8 @@ export const registerUser = async (ca, adminWallet, userData) => {
 export const sendTransaction = async(gateway, transaction) => {
   try {
     const network = await gateway.getNetwork('testchannel');
-    const contract = await network.getContract('recordcontract',
-      'org.fabric.studentRecordsStorage');
+    const contract = await network.getContract('tokenizationcontract',
+      'org.fabric.tokenizationPlatformStorage');
     const issueResponse = await contract.submitTransaction(transaction.name, ...transaction.props);
     return JSON.parse(issueResponse.toString());
     // return true;

@@ -3,9 +3,9 @@
 const { Contract } = require('fabric-contract-api');
 const { ClientIdentity } = require('fabric-shim');
 
-class StudentRecordsStorage extends Contract {
+class TokenizationPlatformStorage extends Contract {
   constructor() {
-    super('org.fabric.studentRecordsStorage');
+    super('org.fabric.tokenizationPlatformStorage');
   }
 
   async createStudentRecord(ctx, studentEmail, fullName) {
@@ -43,4 +43,4 @@ class StudentRecordsStorage extends Contract {
   }
 }
 
-module.exports = StudentRecordsStorage;
+module.exports = TokenizationPlatformStorage;
