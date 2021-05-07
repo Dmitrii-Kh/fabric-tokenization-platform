@@ -9,6 +9,23 @@ class TokenizationPlatformStorage extends Contract {
   }
 
   async createWireframe(ctx) {
+    const investorsAsBytes = await ctx.stub.getState("investors");
+    const validatorsAsBytes = await ctx.stub.getState("validators");
+    const companiesAsBytes = await ctx.stub.getState("companies");
+
+    //todo rethink logic
+    if(!!investorsAsBytes && investorsAsBytes.toString().length !== 0){
+      throw new Error('Investors collection already exist');
+    }
+
+    if(!!validatorsAsBytes && validatorsAsBytes.toString().length !== 0){
+      throw new Error('Validators collection already exist');
+    }
+
+    if(!!companiesAsBytes && companiesAsBytes.toString().length !== 0){
+      throw new Error('Companies collection already exist');
+    }
+
     const investorsObj = {};
     const validatorsObj = {};
     const companiesObj = {};
@@ -37,11 +54,11 @@ class TokenizationPlatformStorage extends Contract {
 
   async createInvestor(ctx, investorFullName) {
     const investorsAsBytes = await ctx.stub.getState("investors");
-    if(!!investorsAsBytes[investorFullName] && investorsAsBytes[investorFullName].toString().length !== 0){
-      throw new Error('Investor with the current name already exist');
-    }
 
     const investorsAsObject = JSON.parse(investorsAsBytes.toString());
+    if(!!investorsAsObject[investorFullName] && investorsAsObject[investorFullName].toString().length !== 0){
+      throw new Error('Investor with the current name already exist');
+    }
 
     investorsAsObject[investorFullName]= {
       wallet: []
@@ -53,11 +70,11 @@ class TokenizationPlatformStorage extends Contract {
 
   async createValidator(ctx, validatorFullName) {
     const validatorsAsBytes = await ctx.stub.getState("validators");
-    if(!!validatorsAsBytes[validatorFullName] && validatorsAsBytes[validatorFullName].toString().length !== 0){
-      throw new Error('Validator with the current name already exist');
-    }
 
     const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
+    if(!!validatorsAsObject[validatorFullName] && validatorsAsObject[validatorFullName].toString().length !== 0){
+      throw new Error('Validator with the current name already exist');
+    }
 
     validatorsAsObject[validatorFullName]= {
       wallet: []
@@ -69,11 +86,11 @@ class TokenizationPlatformStorage extends Contract {
 
   async createCompany(ctx, companyName) {
     const companiesAsBytes = await ctx.stub.getState("companies");
-    if(!!companiesAsBytes[companyName] && companiesAsBytes[companyName].toString().length !== 0){
-      throw new Error('Company with the current name already exist');
-    }
 
     const companiesAsObject = JSON.parse(companiesAsBytes.toString());
+    if(!!companiesAsObject[companyName] && companiesAsObject[companyName].toString().length !== 0){
+      throw new Error('Company with the current name already exist');
+    }
 
     companiesAsObject[companyName]= {
       projects: []
@@ -81,6 +98,15 @@ class TokenizationPlatformStorage extends Contract {
     const newRecordInBytes = Buffer.from(JSON.stringify(companiesAsObject));
     await ctx.stub.putState("companies", newRecordInBytes);
     return JSON.stringify(companiesAsObject, null, 2);
+  }
+
+  async signInToPlatform(ctx) {
+    const identity = new ClientIdentity(ctx.stub);
+    const userData = {
+      commonName: identity.cert.subject.commonName,
+      affiliation: identity.cert.subject.organizationalUnitName
+    }
+    return JSON.stringify(userData, null, 2);
   }
 
 

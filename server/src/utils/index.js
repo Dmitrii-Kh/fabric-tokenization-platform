@@ -12,6 +12,7 @@ export const getCA = () =>{
     throw new Error(e.message)
   }
 }
+
 export const getConnectedWallet = async (label, mixin) => {
   const wallet = new InMemoryWallet();
   await wallet.import(label, mixin);
@@ -27,6 +28,7 @@ export const getConnectedWallet = async (label, mixin) => {
   await gateway.connect(connectionProfile, connectionOptions);
   return gateway;
 }
+
 export const registerUser = async (ca, adminWallet, userData) => {
   try {
     await ca.register({

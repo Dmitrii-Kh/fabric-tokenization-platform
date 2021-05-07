@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link rel="stylesheet" type="text/css" href="stylesheets/styles.css">
+</head>
+<body>
+
+<div class="flex-container">
+    <form class="register-form">
+        <input type="file" id="cert" name="cert" placeholder="Certificate" required><br>
+        <input type="file" id="prKey" name="prKey" placeholder="Private Key" required><br><br>
+        <button class="round-btn" type="submit" id="login-btn">Register</button>
+    </form>
+</div>
+<script type="text/javascript">
+    const form = document.querySelector('.register-form');
+    let cert = "";
+    let prKey = "";
+
+    document.getElementById('cert')
+        .addEventListener('change', function() {
+            let fr = new FileReader();
+            fr.onload=function(){
+                cert=fr.result;
+            }
+            fr.readAsText(this.files[0]);
+            console.log(cert);
+        })
+
+    document.getElementById('prKey')
+        .addEventListener('change', function() {
+            let fr = new FileReader();
+            fr.onload=function(){
+                prKey=fr.result;
+            }
+            fr.readAsText(this.files[0]);
+            console.log(prKey);
+        })
+
+    form.addEventListener('submit', async(e) => {
+        e.preventDefault();
+
+        // const cert = form.login.value;
+        // const prKey = form.password.value;
+
+
+            try{
+                const response = await fetch(`/api/v1/auth/signIn`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({certificate: cert.toString(), privateKey: prKey.toString()})
+                });
+
+                const responseObj = await response.json();
+                if (responseObj.message){
+                    alert(responseObj.message);
+                    console.log(responseObj.error);
+                } else {
+                    //todo putItem to sessionStorage and redirect depending on affiliation
+                    sessionStorage.setItem("cert", responseObj.certificate);
+                    sessionStorage.setItem("prKey", responseObj.privateKey);
+                    sessionStorage.setItem("commonName", responseObj.commonName);
+                    sessionStorage.setItem("affiliation", responseObj.affiliation);
+
+                    alert('Success!');
+                }
+            } catch(e){
+                console.log(e);
+            }
+
+    })
+</script>
+</body>
+</html>
