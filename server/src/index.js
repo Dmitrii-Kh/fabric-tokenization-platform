@@ -7,7 +7,7 @@ app.use(express.urlencoded());
 app.use(express.static(path.join(__dirname, '/public')));
 
 
-//create wireframe if doesn't exist
+// create wireframe if doesn't exist
 // createWireframe()
 //     // .then(r => r.json())
 //     .then(r => {
@@ -24,6 +24,23 @@ app.get('/signup', (req, res) => {
 
 app.get('/signin', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'signIn.html'));
+});
+
+app.get('/validators/:name', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'home.html'));
+});
+
+app.get('/investors/:name', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'home.html'));
+});
+
+app.get('/companies/:name', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'home.html'));
+});
+
+
+app.get('/projects', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'projects.html'));
 });
 
 const appPort = 3000;

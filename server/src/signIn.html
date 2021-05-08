@@ -4,16 +4,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
+    <title>Sign In</title>
     <link rel="stylesheet" type="text/css" href="stylesheets/styles.css">
 </head>
 <body>
 
 <div class="flex-container">
     <form class="register-form">
-        <input type="file" id="cert" name="cert" placeholder="Certificate" required><br>
-        <input type="file" id="prKey" name="prKey" placeholder="Private Key" required><br><br>
-        <button class="round-btn" type="submit" id="login-btn">Register</button>
+        <label class="sign-in-label" for="cert">Certificate
+            <input type="file" id="cert" name="cert" placeholder="Certificate">
+        </label>
+        <br>
+        <label class="sign-in-label" for="prKey">Private Key
+            <input type="file" id="prKey" name="prKey" placeholder="Private Key">
+        </label>
+        <br><br>
+        <button class="round-btn" type="submit" id="login-btn">Sign In</button>
     </form>
 </div>
 <script type="text/javascript">
@@ -22,55 +28,73 @@
     let prKey = "";
 
     document.getElementById('cert')
-        .addEventListener('change', function() {
+        .addEventListener('change', function () {
             let fr = new FileReader();
-            fr.onload=function(){
-                cert=fr.result;
+            fr.onload = function () {
+                cert = fr.result;
+                console.log(cert);
             }
             fr.readAsText(this.files[0]);
-            console.log(cert);
         })
 
     document.getElementById('prKey')
-        .addEventListener('change', function() {
+        .addEventListener('change', function () {
             let fr = new FileReader();
-            fr.onload=function(){
-                prKey=fr.result;
+            fr.onload = function () {
+                prKey = fr.result;
+                console.log(prKey);
             }
             fr.readAsText(this.files[0]);
-            console.log(prKey);
         })
 
-    form.addEventListener('submit', async(e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         // const cert = form.login.value;
         // const prKey = form.password.value;
 
+        try {
+            const response = await fetch(`/api/v1/auth/signIn`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({certificate: cert.toString(), privateKey: prKey.toString()})
+            });
 
-            try{
-                const response = await fetch(`/api/v1/auth/signIn`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({certificate: cert.toString(), privateKey: prKey.toString()})
-                });
+            const responseObj = await response.json();
+            if (responseObj.message) {
+                alert(responseObj.message);
+                console.log(responseObj.message);
+            } else {
+                //todo putItem to sessionStorage and redirect depending on affiliation
+                sessionStorage.setItem("cert", responseObj.certificate);
+                sessionStorage.setItem("prKey", responseObj.privateKey);
+                sessionStorage.setItem("commonName", responseObj.commonName);
+                sessionStorage.setItem("affiliation", responseObj.affiliation);
 
-                const responseObj = await response.json();
-                if (responseObj.message){
-                    alert(responseObj.message);
-                    console.log(responseObj.error);
-                } else {
-                    //todo putItem to sessionStorage and redirect depending on affiliation
-                    sessionStorage.setItem("cert", responseObj.certificate);
-                    sessionStorage.setItem("prKey", responseObj.privateKey);
-                    sessionStorage.setItem("commonName", responseObj.commonName);
-                    sessionStorage.setItem("affiliation", responseObj.affiliation);
 
-                    alert('Success!');
+                let url = ""
+                const cn = responseObj.commonName;
+                switch (responseObj.affiliation) {
+                    case 'investor':
+                        url = `investors/${cn}`
+                        break;
+                    case 'validator':
+                        url = `validators/${cn}`
+                        break;
+                    case 'systemAdmin':
+                        url = `admin/investors`
+                        break;
+                    case 'company':
+                        url = `companies/${cn}`
+                        break;
+                    default:
+                        break;
                 }
-            } catch(e){
-                console.log(e);
+                window.location.replace(`http://localhost:3000/${url}`);
             }
+        } catch (e) {
+            console.log(e);
+        }
 
     })
 </script>

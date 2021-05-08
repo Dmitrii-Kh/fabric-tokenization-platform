@@ -18,6 +18,10 @@ const companyRegistration = async (req, res) => {
   return registration(req, res, "company");
 };
 
+const adminRegistration = async (req, res) => {
+  return registration(req, res, "systemAdmin");
+};
+
 const registration = async (req, res, affiliation) => {
   const { login, password } = req.body;
   try {
@@ -32,7 +36,7 @@ const registration = async (req, res, affiliation) => {
     const admin = await gateway.getCurrentIdentity()
     await registerUser(ca, admin, { login, password, affiliation: affiliation });
 
-    //todo createEntity call
+    //createEntity call
     if(affiliation === "investor") {
       const res = await createInvestor(gateway, login);
       console.log("Investor created: " + res);
@@ -53,6 +57,8 @@ const registration = async (req, res, affiliation) => {
       enrollmentSecret: password,
     });
     gateway.disconnect();
+    console.log(userData.certificate);
+    console.log(userData.key.toBytes());
     res.status(201).json({
       login,
       certificate: userData.certificate,
@@ -87,5 +93,6 @@ router.post('/signIn', signIn);
 router.post('/investor', investorRegistration);
 router.post('/validator', validatorRegistration);
 router.post('/company', companyRegistration);
+router.post('/systemAdmin', adminRegistration);
 
 export default router;
