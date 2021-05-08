@@ -176,7 +176,7 @@ const getAllProjects = async (req, res) => {
             props: []
         })
         gateway.disconnect()
-        res.status(201).json({data: result})
+        res.status(201).json(result)
     } catch (e) {
         res.status(400).json({message: e.message});
     }
@@ -246,7 +246,7 @@ const getValidatorWallet = async (req, res) => {
             props: [validatorFullName]
         })
         gateway.disconnect()
-        res.status(201).json({data: result})
+        res.status(201).json(result)
     } catch (e) {
         res.status(400).json({message: e.message});
     }
@@ -279,7 +279,7 @@ router.post('/getValidatorWallet', getValidatorWallet);
 router.post('/getProjectWallet', getProjectWallet);
 
 router.post('/createNewProject', createNewProject);
-router.get('/getAllProjects', getAllProjects);
+router.post('/getAllProjects', getAllProjects);
 
 router.post('/depositInvestor', depositInvestor);
 router.post('/depositCompanyProject', depositCompanyProject);
