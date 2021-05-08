@@ -26,6 +26,18 @@ app.get('/signin', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'signIn.html'));
 });
 
+app.get('/validators/:name', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'home.html'));
+});
+
+app.get('/investors/:name', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'home.html'));
+});
+
+app.get('/companies/:name', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'home.html'));
+});
+
 const appPort = 3000;
 app.listen(
     appPort,

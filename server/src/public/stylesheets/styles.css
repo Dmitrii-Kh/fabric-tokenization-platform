@@ -78,3 +78,93 @@ label {
 .round-btn:hover {
     border: 2px solid whitesmoke;
 }
+
+/* ************** NAVBAR ************** */
+.nav-wrapper {
+    height: 60px;
+}
+
+#navbar {
+    width: 100%;
+    height: 60px;
+    background-color: #fff;
+    position: fixed;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(47, 47, 47, 0.25);
+}
+
+.navbar-content {
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 80px;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.navbar-menu, .register-menu {
+    height: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    font-family: 'PS Commons Bold', sans-serif;
+}
+
+nav {
+    height: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
+}
+
+.navbar-menu a, .register-menu a {
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+    color: #0e0e0e;
+    font-weight: bold;
+    text-decoration: none;
+
+}
+
+nav a{
+    transition: all .1s linear;
+}
+
+nav a:hover{
+    color: blue;
+    text-decoration: underline;
+    text-underline-offset: 7px;
+    /*background: linear-gradient(100.37deg, rgb(236, 0, 139) 0%, rgb(241, 90, 34) 100%);*/
+}
+
+#user-name {
+    padding: 0 25px;
+}
+
+h4 {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+/* HOME PAGE */
+.wallet-info {
+    min-height: 400px;
+    width: 500px;
+    text-align: center;
+}
+
+.wallet-info h3 {
+    margin-bottom: 20px;
+}
+
+.wallet-table {
+    width: 100%;
+    height: auto;
+    background-color: #fff;
+    text-align: center;
+}

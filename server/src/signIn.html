@@ -47,7 +47,6 @@
         // const cert = form.login.value;
         // const prKey = form.password.value;
 
-
             try{
                 const response = await fetch(`/api/v1/auth/signIn`, {
                     method: 'POST',
@@ -67,6 +66,26 @@
                     sessionStorage.setItem("affiliation", responseObj.affiliation);
 
                     alert('Success!');
+
+                    let url = ""
+                    const cn = responseObj.commonName;
+                    switch(responseObj.affiliation) {
+                        case 'investor':
+                            url = `investors/${cn}`
+                            break;
+                        case 'validator':
+                            url = `validators/${cn}`
+                            break;
+                        case 'systemAdmin':
+                            url = `admin/investors`
+                            break;
+                        case 'company':
+                            url = `companies/${cn}`
+                            break;
+                        default:
+                            break;
+                    }
+                    window.location.replace(`http://localhost:3000/${url}`);
                 }
             } catch(e){
                 console.log(e);
