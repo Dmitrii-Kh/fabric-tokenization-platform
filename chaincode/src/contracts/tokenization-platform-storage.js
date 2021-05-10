@@ -155,7 +155,7 @@ class TokenizationPlatformStorage extends Contract {
             return JSON.stringify(companiesAsObject[identity.cert.subject.commonName].projects, null, 2);
         }
 
-        if (identity.cert.subject.organizationalUnitName === 'systemAdmin' || identity.cert.subject.organizationalUnitName === 'validator') {
+        if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
             let result = []
             //todo check if no companies
             Object.entries(companiesAsObject).forEach(([key, value]) => {
@@ -185,7 +185,7 @@ class TokenizationPlatformStorage extends Contract {
             Object.entries(companiesAsObject).forEach(([key, value]) => {
                     if (value.projects.length === 0) return;
                     value.projects.forEach(project => {
-                        if (project.approved === true) {
+                        if (project.approved === true || project.approved === "true") {
                             result.push(
                                 {
                                     companyName: key,
@@ -206,6 +206,32 @@ class TokenizationPlatformStorage extends Contract {
             return JSON.stringify(result, null, 2);
         }
 
+        if (identity.cert.subject.organizationalUnitName === 'validator') {
+            let result = []
+            //todo check if no companies
+            Object.entries(companiesAsObject).forEach(([key, value]) => {
+                    if (value.projects.length === 0) return;
+                    value.projects.forEach(project => {
+                        if (project.approved === "false" || project.approved === false) {
+                            result.push(
+                                {
+                                    companyName: key,
+                                    projectName: project.projectName,
+                                    projectDescription: project.projectDescription,
+                                    emission: project.emission,
+                                    tokenName: project.tokenName,
+                                    priceInUSDT: project.priceInUSDT,
+                                    approved: project.approved
+                                }
+                            )
+                        }
+
+                    })
+                }
+            );
+
+            return JSON.stringify(result, null, 2);
+        }
     }
 
 
@@ -401,7 +427,7 @@ class TokenizationPlatformStorage extends Contract {
 
     }
 
-
+    //todo check returns for valid response
     async approveProject(ctx, projectName, companyName) {
         const identity = new ClientIdentity(ctx.stub);
         if (identity.cert.subject.organizationalUnitName !== 'validator') {
@@ -420,17 +446,18 @@ class TokenizationPlatformStorage extends Contract {
                     proj.wallet.forEach((record) => {
                         if (record.currencyName === VALIDATOR_FEE_CURRENCY) {
                             if(Number(record.amount) - Number(VALIDATOR_FEE) < 0) {
-                                return JSON.stringify({message: "Project does not posses enough USDT"});
+                                throw new Error("Project does not possess enough USDT");
+                                return JSON.stringify({message: "Project does not possess enough USDT"}, null, 2);
                             } else {
                                 record.amount = Number(record.amount) - Number(VALIDATOR_FEE);
-                                proj.approve = true;
-                                approved = true;
+                                proj.approved = true;
+                                approved = "true";
                             }
                             inArr = true;
                         }
                     })
                     if(!inArr){
-                        return JSON.stringify({message: "Project does not posses USDT"});
+                        return JSON.stringify({message: "Project does not possess USDT"});
                     }
                 }
             }
@@ -438,7 +465,7 @@ class TokenizationPlatformStorage extends Contract {
 
         if(approved) {
             try {
-                await this.depositValidator(ctx, identity.cert.subject.commonName, VALIDATOR_FEE_CURRENCY, VALIDATOR_FEE)
+               await this.addApprovedProject(ctx, companyName, projectName);
             } catch (e) {
                 throw new Error("Error during validator deposit!");
             }
@@ -448,6 +475,103 @@ class TokenizationPlatformStorage extends Contract {
         await ctx.stub.putState("companies", newRecordInBytes);
         return JSON.stringify(companiesAsObject[companyName], null, 2);
 
+    }
+
+    async addApprovedProject(ctx, companyName, projectName) {
+        const identity = new ClientIdentity(ctx.stub);
+        const validatorsAsBytes = await ctx.stub.getState("validators");
+        const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
+        const validator = validatorsAsObject[identity.cert.subject.commonName];
+        if(!validator.approvedProjects) {
+            validator.approvedProjects = [];
+        }
+        validator.approvedProjects.push({
+            companyName: companyName,
+            projectName: projectName,
+            approvalDate: Date.now()
+        })
+
+        let wallet = validatorsAsObject[identity.cert.subject.commonName].wallet;
+        if (wallet.length === 0) {
+            wallet.push({
+                currencyName: VALIDATOR_FEE_CURRENCY,
+                amount: Number(VALIDATOR_FEE)
+            })
+        } else {
+            let inArr = false;
+            wallet.forEach((record) => {
+                if (record.currencyName === VALIDATOR_FEE_CURRENCY) {
+                    record.amount = Number(record.amount) + Number(VALIDATOR_FEE);
+                    inArr = true;
+                }
+            })
+            if(!inArr){
+                wallet.push({
+                    currencyName: VALIDATOR_FEE_CURRENCY,
+                    amount: Number(VALIDATOR_FEE)
+                })
+            }
+        }
+
+        await ctx.stub.putState("validators", Buffer.from(JSON.stringify(validatorsAsObject)));
+    }
+
+    async getInvestors(ctx) {
+        const identity = new ClientIdentity(ctx.stub);
+        if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
+            throw new Error('Current subject does not have access to this function');
+        }
+        const investorsAsBytes = await ctx.stub.getState("investors");
+        const investorsAsObject = JSON.parse(investorsAsBytes.toString());
+
+        return JSON.stringify(Object.keys(investorsAsObject), null, 2);
+    }
+
+
+    async investToProject(ctx, investorFullName, companyName, projectName, currency, amount) {
+        const identity = new ClientIdentity(ctx.stub);
+        if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
+            throw new Error('Current subject does not have access to this function');
+        }
+        const investorsAsBytes = await ctx.stub.getState("investors");
+        const investorsAsObject = JSON.parse(investorsAsBytes.toString());
+        const investorWallet = investorsAsObject[investorFullName].wallet;
+
+
+        //withdraw investor's money
+        if(investorWallet.length === 0) {
+            //todo send response
+            throw new Error("Current investor's portfolio is empty");
+        }else {
+            let inArr = false;
+            wallet.forEach((record) => {
+                if (record.currencyName === currency) {
+                    if(Number(record.amount) - Number(amount) < 0) {
+                        throw new Error(`Current investor does not possess enough ${currency}`);
+                    } else {
+                        record.amount = Number(record.amount) - Number(amount);
+                    }
+                    inArr = true;
+                }
+            })
+            if(!inArr){
+                throw new Error("Current investor does not possess this token");
+            }
+        }
+        //commit investors withdrawal
+        const newRecordInBytes = Buffer.from(JSON.stringify(investorsAsObject));
+        await ctx.stub.putState("investors", newRecordInBytes);
+
+        const projToInvest = await this.getProject(ctx, projectName, companyName);
+
+        const projectTokenAmount = Number(amount) / Number(projToInvest.priceInUSDT);
+
+        //todo check whether its possible to withdraw this amount from project
+        //write this amount to [supply]
+        // deposit investor
+        // deposit project
+
+        return JSON.stringify(investorsAsObject[investorFullName], null, 2);
     }
 
 

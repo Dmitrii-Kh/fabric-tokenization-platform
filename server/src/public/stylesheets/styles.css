@@ -341,7 +341,7 @@ h4 {
     width: 100%;
 }
 
-.projects-container .active, .project-detailed-container .active {
+.projects-container .active, .project-detailed-container .active, .investor-detailed-container .active {
     border: 1px solid blue;
 }
 
@@ -432,7 +432,7 @@ h4 {
     border-image: linear-gradient(to right, #EC008C 0%, #F15A22FF 100%) 1;
 }
 
-.project-detailed-container {
+.project-detailed-container, .investor-detailed-container {
     display: flex;
     flex-flow: column;
     justify-content: center;
@@ -446,6 +446,71 @@ h4 {
     border-color: blue;
 }
 
-.detailed-project-portfolio{
+.detailed-project-portfolio, .detailed-investor-portfolio{
     margin-top: 35px;
+}
+
+.detailed-proj-btn {
+    width: 250px;
+    height: 60px;
+    /*remove*/
+    margin-top: 100px;
+    background: gainsboro;
+    color: #181818;
+    border: none;
+    transition: all .1s ease;
+    border-radius: 5px;
+}
+
+.detailed-proj-btn:hover {
+    border-color: #f1f1f1;
+    background: blue;
+    color: #fff;
+}
+
+/*.collapsible-proj-detailed {*/
+/*    width: 45%;*/
+/*}*/
+
+.btn-row {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    /*justify-content: space-between;*/
+    /*align-items: center;*/
+}
+
+.deposit-investor-btn {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.investors-container {
+    margin-top: 150px;
+    width: 350px;
+    text-align: center;
+}
+.investors-container h2 {
+    margin-bottom: 35px;
+}
+
+.investors-container a {
+    display: block;
+    width: 100%;
+    height: 35px;
+    background-color: #ffffff;
+    margin: 5px 0;
+    text-align: center;
+    padding-top: 8px;
+    text-decoration: none;
+    color: #181818;
+    transition: all .1s;
+}
+.investors-container a:hover {
+    color: blue;
+}
+
+.empty-portfolio-alert {
+    text-align: center;
+    width: 100%;
 }

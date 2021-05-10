@@ -52,6 +52,10 @@ app.get('/admin/investors', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'investorList.html'));
 });
 
+app.get('/admin/investors/:investorName', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'investorDetailed.html'));
+});
+
 
 const appPort = 3000;
 app.listen(

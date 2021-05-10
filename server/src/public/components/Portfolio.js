@@ -1,8 +1,17 @@
+
+function Header(){
+    if(sessionStorage.getItem('affiliation') === 'validator') {
+        return <h3>Balance</h3>
+    } else {
+        return <h3>Portfolio</h3>
+    }
+}
+
 class Portfolio extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            wallet: [],
+            wallet: undefined,
         };
     }
 
@@ -27,13 +36,13 @@ class Portfolio extends React.Component {
                 body['projectName'] = this.props.projectName;
                 break;
             case 'systemAdmin':
-                if(window.location.href.indexOf('/projects/')> -1) {
+                if (window.location.href.indexOf('/projects/') > -1) {
                     url = `/api/v1/platform/getProjectWallet`
                     // body['companyName'] = window.location.href.split('/')[4];
                     // body['projectName'] = window.location.href.split('/')[5];
                     body['companyName'] = this.props.companyName;
                     body['projectName'] = this.props.projectName;
-                } else if(window.location.href.indexOf('/admin/investors/')> -1){
+                } else if (window.location.href.indexOf('/admin/investors/') > -1) {
                     url = `/api/v1/platform/getInvestorWallet`
                     // body['investorFullName'] = window.location.href.split('/')[5];
                     body['investorFullName'] = this.props.investorFullName;
@@ -66,22 +75,38 @@ class Portfolio extends React.Component {
 
     render() {
         if (this.state.wallet) {
+            if (this.state.wallet.length === 0) {
+                return (
+                    <div>
+                        <table className="table table-hover wallet-table">
+                            <tbody>
+                            <tr>
+                                <th>Currency</th>
+                                <th>Amount</th>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div className="empty-portfolio-alert">User's portfolio is empty</div>
+                    </div>
+                )
+            }
             return (
+                        <div><Header/>
+                            <table className="table table-hover wallet-table">
+                                <tbody>
+                                <tr>
+                                    <th>Currency</th>
+                                    <th>Amount</th>
+                                </tr>
+                                {this.state.wallet.map((record) => (
+                                    <tr>
+                                        <td>{record.currencyName}</td>
+                                        <td>{record.amount}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table></div>
 
-                <table className="table table-hover wallet-table">
-                    <tbody>
-                    <tr>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                    </tr>
-                    {this.state.wallet.map((record) => (
-                        <tr>
-                            <td>{record.currencyName}</td>
-                            <td>{record.amount}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
 
             );
         } else {
