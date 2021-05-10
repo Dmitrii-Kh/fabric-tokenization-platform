@@ -13,6 +13,7 @@ class Portfolio extends React.Component {
 
     loadPosts() {
         let url;
+        let body = {certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')};
         switch (sessionStorage.getItem('affiliation')) {
             case 'investor':
                 url = `/api/v1/platform/getInvestorWallet`
@@ -21,21 +22,34 @@ class Portfolio extends React.Component {
                 url = `/api/v1/platform/getValidatorWallet`
                 break;
             case 'company':
-                url = `` //todo summary investments
+                url = `/api/v1/platform/getProjectWallet`
+                // body['projectName'] = window.location.href.split('/')[5];
+                body['projectName'] = this.props.projectName;
+                break;
+            case 'systemAdmin':
+                if(window.location.href.indexOf('/projects/')> -1) {
+                    url = `/api/v1/platform/getProjectWallet`
+                    // body['companyName'] = window.location.href.split('/')[4];
+                    // body['projectName'] = window.location.href.split('/')[5];
+                    body['companyName'] = this.props.companyName;
+                    body['projectName'] = this.props.projectName;
+                } else if(window.location.href.indexOf('/admin/investors/')> -1){
+                    url = `/api/v1/platform/getInvestorWallet`
+                    // body['investorFullName'] = window.location.href.split('/')[5];
+                    body['investorFullName'] = this.props.investorFullName;
+                }
                 break;
             default:
                 break;
         }
-
         fetch(url, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')})
+            body: JSON.stringify(body)
         })
             .then((res) => res.json())
             .then((res) => {
                 this.handleChange(res);
-                console.log(res)
             });
     }
 

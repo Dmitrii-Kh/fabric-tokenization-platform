@@ -173,7 +173,7 @@ h4 {
 
 /* HOME PAGE */
 .wallet-info {
-    min-height: 400px;
+    /*min-height: 400px;*/
     width: 500px;
     text-align: center;
 }
@@ -283,12 +283,13 @@ h4 {
     position: absolute;
     bottom: 0;
     transition: all .2s linear;
+    color: #fff;
 }
 
 .floating-up-div a {
     display: none;
     overflow: hidden;
-    color: #cdcdcd;
+    color: #ffffff;
 }
 
 .floating-up-div:hover {
@@ -296,6 +297,7 @@ h4 {
     display: flex;
     align-items: stretch;
     background: linear-gradient(to right, #74abff, #3009FF,#74abff);
+    color: #fff;
 }
 
 .floating-up-div:hover a {
@@ -339,7 +341,7 @@ h4 {
     width: 100%;
 }
 
-.projects-container .active {
+.projects-container .active, .project-detailed-container .active {
     border: 1px solid blue;
 }
 
@@ -430,3 +432,20 @@ h4 {
     border-image: linear-gradient(to right, #EC008C 0%, #F15A22FF 100%) 1;
 }
 
+.project-detailed-container {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
+.deposit-project-btn {
+    width: 500px;
+}
+
+.deposit-project-btn:hover {
+    border-color: blue;
+}
+
+.detailed-project-portfolio{
+    margin-top: 35px;
+}

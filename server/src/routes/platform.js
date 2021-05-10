@@ -202,6 +202,7 @@ const depositInvestor = async (req, res) => {
 
 const depositCompanyProject = async (req, res) => {
     const {certificate, privateKey, companyName, projectName, currency, amount} = req.body;
+
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
@@ -264,7 +265,43 @@ const getProjectWallet = async (req, res) => {
             props: [projectName, companyName]
         })
         gateway.disconnect()
-        res.status(201).json({data: result})
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({message: e.message});
+    }
+};
+
+
+const getProject = async (req, res) => {
+    let {certificate, privateKey, projectName, companyName} = req.body;
+    companyName = companyName || ""
+    try {
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const gateway = await getConnectedWallet('Org1MSP', mixin);
+        const result = await sendTransaction(gateway, {
+            name: 'getProject',
+            props: [projectName, companyName]
+        })
+        gateway.disconnect()
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({message: e.message});
+    }
+};
+
+
+const approveProject = async (req, res) => {
+    let {certificate, privateKey, projectName, companyName} = req.body;
+
+    try {
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const gateway = await getConnectedWallet('Org1MSP', mixin);
+        const result = await sendTransaction(gateway, {
+            name: 'approveProject',
+            props: [projectName, companyName]
+        })
+        gateway.disconnect()
+        res.status(201).json(result)
     } catch (e) {
         res.status(400).json({message: e.message});
     }
@@ -278,10 +315,14 @@ router.post('/getInvestorWallet', getInvestorWallet);
 router.post('/getValidatorWallet', getValidatorWallet);
 router.post('/getProjectWallet', getProjectWallet);
 
+router.post('/getProject', getProject);
+
 router.post('/createNewProject', createNewProject);
 router.post('/getAllProjects', getAllProjects);
 
 router.post('/depositInvestor', depositInvestor);
 router.post('/depositCompanyProject', depositCompanyProject);
+
+router.post('/approveProject', approveProject);
 
 export default router;

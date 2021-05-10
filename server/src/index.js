@@ -43,6 +43,16 @@ app.get('/projects', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'projects.html'));
 });
 
+app.get('/projects/:companyName/:projName', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'projectDetailed.html'));
+});
+
+
+app.get('/admin/investors', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'investorList.html'));
+});
+
+
 const appPort = 3000;
 app.listen(
     appPort,
