@@ -61,7 +61,7 @@ class Projects extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            projects: []
+            projects: undefined
         };
 
         this.sortKey = {

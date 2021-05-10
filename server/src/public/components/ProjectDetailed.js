@@ -47,7 +47,7 @@ function DepositProjectMenu(props) {
                                 alert(responseObj.message);
                                 console.log(responseObj.error);
                             } else {
-                                alert('Successfully!');
+                                alert('Success!');
                             }
                         } catch (e) {
                             console.log(e);
@@ -82,7 +82,6 @@ function ProjectPortfolio(props) {
     if (affiliation === 'systemAdmin' || affiliation === 'company') {
         return (
             <div className="wallet-info detailed-project-portfolio">
-                <h3>Portfolio</h3>
                 <div className="portfolio">
                     <Portfolio projectName={props.projectName} companyName={props.companyName}/>
                 </div>
@@ -92,8 +91,34 @@ function ProjectPortfolio(props) {
     return <span/>
 }
 
-function ApproveBtn() {
+function ApproveBtn(props) {
     //validator
+    if(sessionStorage.getItem("affiliation") === 'validator' && (props.approved === false || props.approved === "false")){
+        let body = {
+            certificate: sessionStorage.getItem('cert'),
+            privateKey: sessionStorage.getItem('prKey'),
+            companyName: props.companyName,
+            projectName: props.projectName
+        };
+     return (
+         <button className="detailed-proj-btn" onClick={async (e) => {
+             const response = await fetch('/api/v1/platform/approveProject', {
+                 method: 'POST',
+                 headers: {'Content-Type': 'application/json'},
+                 body: JSON.stringify(body)
+             });
+
+             const responseObj = await response.json();
+             if (responseObj.message) {
+                 alert(responseObj.message);
+                 console.log(responseObj.error);
+             } else {
+                 alert('Success!');
+             }
+         }}>Approve Project</button>
+     )
+    }
+    return <span></span>
 }
 
 class ProjectDetailed extends React.Component {
@@ -159,7 +184,11 @@ class ProjectDetailed extends React.Component {
                         projectName={this.state.project.projectName}
                         companyName={this.state.project.companyName}
                     />
-
+                    <ApproveBtn
+                        projectName={this.state.project.projectName}
+                        companyName={this.state.project.companyName}
+                        approved={this.state.project.approved}
+                    />
                     <div className="project-docs"></div>
                 </div>
 
