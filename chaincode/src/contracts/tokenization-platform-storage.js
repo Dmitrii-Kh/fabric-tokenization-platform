@@ -167,6 +167,7 @@ class TokenizationPlatformStorage extends Contract {
                                 projectName: project.projectName,
                                 projectDescription: project.projectDescription,
                                 emission: project.emission,
+                                supply: project.supply,
                                 tokenName: project.tokenName,
                                 priceInUSDT: project.priceInUSDT,
                                 approved: project.approved
@@ -467,7 +468,7 @@ class TokenizationPlatformStorage extends Contract {
             try {
                await this.addApprovedProject(ctx, companyName, projectName);
             } catch (e) {
-                throw new Error("Error during validator deposit!");
+                throw new Error("Error during adding project to validator's list!");
             }
         }
 
@@ -544,7 +545,7 @@ class TokenizationPlatformStorage extends Contract {
             throw new Error("Current investor's portfolio is empty");
         }else {
             let inArr = false;
-            wallet.forEach((record) => {
+            investorWallet.forEach((record) => {
                 if (record.currencyName === currency) {
                     if(Number(record.amount) - Number(amount) < 0) {
                         throw new Error(`Current investor does not possess enough ${currency}`);
@@ -558,18 +559,77 @@ class TokenizationPlatformStorage extends Contract {
                 throw new Error("Current investor does not possess this token");
             }
         }
-        //commit investors withdrawal
-        const newRecordInBytes = Buffer.from(JSON.stringify(investorsAsObject));
-        await ctx.stub.putState("investors", newRecordInBytes);
 
-        const projToInvest = await this.getProject(ctx, projectName, companyName);
+
+        const projToInvestAsString = await this.getProject(ctx, projectName, companyName);
+        const projToInvest = JSON.parse(projToInvestAsString);
 
         const projectTokenAmount = Number(amount) / Number(projToInvest.priceInUSDT);
 
-        //todo check whether its possible to withdraw this amount from project
+        //check whether its possible to withdraw this amount from project
         //write this amount to [supply]
+        const companiesAsBytes = await ctx.stub.getState("companies");
+        const companiesAsObject = JSON.parse(companiesAsBytes.toString());
+
+
+        companiesAsObject[companyName].projects.forEach(proj => {
+            if(proj.projectName === projectName){
+                if(!proj["supply"]) {
+                    proj["supply"] = 0;
+                }
+                if(Number(proj.emission) - (Number(proj.supply) + Number(projectTokenAmount)) < 0) {
+                    throw new Error("Impossible to withdraw project token, not enough!");
+                } else {
+                  proj.supply = Number(proj.supply)+ Number(projectTokenAmount);
+                }
+            }
+        })
+
+
+
         // deposit investor
+        let inArr = false;
+        investorWallet.forEach((record) => {
+            if (record.currencyName === projToInvest.tokenName) {
+                record.amount = Number(record.amount) + Number(projectTokenAmount);
+                inArr = true;
+            }
+        })
+        if(!inArr){
+            investorWallet.push({
+                currencyName: projToInvest.tokenName,
+                amount: Number(projectTokenAmount)
+            })
+        }
+
         // deposit project
+        companiesAsObject[companyName].projects.forEach(proj => {
+            if(proj.projectName === projectName){
+                if(proj.wallet.length === 0) {
+                    proj.wallet.push({
+                        currencyName: currency,
+                        amount: Number(amount)
+                    })
+                } else {
+                    let inArr = false;
+                    proj.wallet.forEach((record) => {
+                        if (record.currencyName === currency) {
+                            record.amount = Number(record.amount) + Number(amount);
+                            inArr = true;
+                        }
+                    })
+                    if(!inArr){
+                        proj.wallet.push({
+                            currencyName: currency,
+                            amount: Number(amount)
+                        })
+                    }
+                }
+            }
+        })
+
+        await ctx.stub.putState("investors", Buffer.from(JSON.stringify(investorsAsObject)));
+        await ctx.stub.putState("companies", Buffer.from(JSON.stringify(companiesAsObject)));
 
         return JSON.stringify(investorsAsObject[investorFullName], null, 2);
     }
