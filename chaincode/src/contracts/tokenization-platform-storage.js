@@ -2,11 +2,14 @@
 
 const {Contract} = require('fabric-contract-api');
 const {ClientIdentity} = require('fabric-shim');
+const VALIDATOR_FEE = 250;
+const VALIDATOR_FEE_CURRENCY = "USDT";
 
 class TokenizationPlatformStorage extends Contract {
     constructor() {
         super('org.fabric.tokenizationPlatformStorage');
     }
+
 
     async createWireframe(ctx) {
         const investorsAsBytes = await ctx.stub.getState("investors");
@@ -242,6 +245,40 @@ class TokenizationPlatformStorage extends Contract {
     }
 
     //todo deposit validator
+    async depositValidator(ctx, validatorFullName, currency, amount) {
+        const identity = new ClientIdentity(ctx.stub);
+        // if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
+        //     throw new Error('Current subject does not have access to this function');
+        // }
+        const validatorsAsBytes = await ctx.stub.getState("validators");
+        const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
+        //todo check whether investor exists
+
+        let wallet = validatorsAsObject[validatorFullName].wallet;
+        if (wallet.length === 0) {
+            wallet.push({
+                currencyName: currency,
+                amount: Number(amount)
+            })
+        } else {
+            let inArr = false;
+            wallet.forEach((record) => {
+                if (record.currencyName === currency) {
+                    record.amount = Number(record.amount) + Number(amount);
+                    inArr = true;
+                }
+            })
+            if(!inArr){
+                wallet.push({
+                    currencyName: currency,
+                    amount: Number(amount)
+                })
+            }
+        }
+        const newRecordInBytes = Buffer.from(JSON.stringify(validatorsAsObject));
+        await ctx.stub.putState("validators", newRecordInBytes);
+        return JSON.stringify(validatorsAsObject[validatorFullName], null, 2);
+    }
 
     async depositCompanyProject(ctx, companyName, projectName, currency, amount){
         const identity = new ClientIdentity(ctx.stub);
@@ -338,6 +375,79 @@ class TokenizationPlatformStorage extends Contract {
         }
 
         //throw new Error('Current subject does not have access to this function');
+    }
+
+
+    async getProject(ctx, projectName, companyName) {
+        companyName = companyName || "";
+        const identity = new ClientIdentity(ctx.stub);
+        const companiesAsBytes = await ctx.stub.getState("companies");
+        const companiesAsObject = JSON.parse(companiesAsBytes.toString());
+        let result = {};
+        if (identity.cert.subject.organizationalUnitName === 'company') {
+            companiesAsObject[identity.cert.subject.commonName].projects.forEach(proj => {
+                if (proj.projectName === projectName) {
+                    result = {companyName: identity.cert.subject.commonName, ...proj};
+                }
+            })
+            return JSON.stringify(result, null, 2);
+        }
+        companiesAsObject[companyName].projects.forEach(proj => {
+            if (proj.projectName === projectName) {
+                result = {companyName: companyName, ...proj};
+            }
+        })
+        return JSON.stringify(result, null, 2);
+
+    }
+
+
+    async approveProject(ctx, projectName, companyName) {
+        const identity = new ClientIdentity(ctx.stub);
+        if (identity.cert.subject.organizationalUnitName !== 'validator') {
+            throw new Error('Current subject does not have access to this function');
+        }
+        const companiesAsBytes = await ctx.stub.getState("companies");
+        const companiesAsObject = JSON.parse(companiesAsBytes.toString());
+
+        let approved = false;
+        companiesAsObject[companyName].projects.forEach(proj => {
+            if(proj.projectName === projectName){
+                if(proj.wallet.length === 0) {
+                    return JSON.stringify({message: "Project's portfolio is empty"});
+                } else {
+                    let inArr = false;
+                    proj.wallet.forEach((record) => {
+                        if (record.currencyName === VALIDATOR_FEE_CURRENCY) {
+                            if(Number(record.amount) - Number(VALIDATOR_FEE) < 0) {
+                                return JSON.stringify({message: "Project does not posses enough USDT"});
+                            } else {
+                                record.amount = Number(record.amount) - Number(VALIDATOR_FEE);
+                                proj.approve = true;
+                                approved = true;
+                            }
+                            inArr = true;
+                        }
+                    })
+                    if(!inArr){
+                        return JSON.stringify({message: "Project does not posses USDT"});
+                    }
+                }
+            }
+        })
+
+        if(approved) {
+            try {
+                await this.depositValidator(ctx, identity.cert.subject.commonName, VALIDATOR_FEE_CURRENCY, VALIDATOR_FEE)
+            } catch (e) {
+                throw new Error("Error during validator deposit!");
+            }
+        }
+
+        const newRecordInBytes = Buffer.from(JSON.stringify(companiesAsObject));
+        await ctx.stub.putState("companies", newRecordInBytes);
+        return JSON.stringify(companiesAsObject[companyName], null, 2);
+
     }
 
 

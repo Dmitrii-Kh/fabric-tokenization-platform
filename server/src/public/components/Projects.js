@@ -14,7 +14,8 @@ function AddProjectMenu() {
                 }
                 }>Create New Project</button>
                 <div className="collapsible-project-adding">
-                    <form className="create-project-form" onSubmit={async () => {
+                    <form className="create-project-form" onSubmit={async (e) => {
+                        e.preventDefault();
                         try {
                             const projectName = document.getElementById("project-name").value;
                             const projectEmission = document.getElementById("project-emission").value;
@@ -96,7 +97,7 @@ class Projects extends React.Component {
 
     componentDidMount() {
         this.loadPosts();
-        this.interval = setInterval(() => this.loadPosts(), 30000);
+        this.interval = setInterval(() => this.loadPosts(), 3000);
     }
 
     componentWillUnmount() {

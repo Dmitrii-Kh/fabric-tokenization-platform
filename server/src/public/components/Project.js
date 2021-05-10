@@ -86,7 +86,7 @@ const Project = (props) => {
                 <ApprovalInfo approved={approved}/>
             </div>
             <div className="floating-up-div">
-                <a className="more-info-ref" href={`/projects/${projectName}`}>More info</a>
+                <a className="more-info-ref" href={`/projects/${companyName}/${projectName}`}>More info</a>
             </div>
         </div>
     )
