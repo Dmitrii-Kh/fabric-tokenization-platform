@@ -45,7 +45,7 @@ function AddProjectMenu() {
                         <input type="text" id="project-name" name="project-name" placeholder="Project Name " required/>
                         <input type="text" id="project-emission" name="project-emission" placeholder="Emission " required/>
                         <input type="text" id="project-token-name" name="project-token-name" placeholder="Token Name " required/>
-                        <input type="number" id="project-token-price" name="project-token-price" min="0" placeholder="Price in USDT " required/>
+                        <input type="number" id="project-token-price" name="project-token-price" min="0" step="0.01" placeholder="Price in USDT " required/>
                         <textarea name="new-project-description" id="new-project-description" placeholder="Description" required/>
 
                         <button className="create-new-project-btn" type="submit" id="create-new-project-btn">Submit</button>
@@ -161,6 +161,7 @@ class Projects extends React.Component {
                             projectName = { project.projectName }
                             projectDescription = { project.projectDescription }
                             emission = { project.emission }
+                            supply = { project.supply }
                             tokenName = { project.tokenName }
                             priceInUSDT = { project.priceInUSDT }
                             approved = { project.approved }

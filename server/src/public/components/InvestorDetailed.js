@@ -51,7 +51,7 @@ function DepositInvestorMenu(props) {
                         <input type="text" id="deposit-investor-currency" name="deposit-investor-currency" min="0"
                                placeholder="Currency " required/>
                         <input type="number" id="deposit-investor-amount" name="deposit-investor-amount" min="0"
-                               placeholder="Amount " required/>
+                               placeholder="Amount " step="0.01" required/>
 
                         <button className="create-new-project-btn" type="submit" id="create-new-project-btn">Submit
                         </button>
@@ -117,7 +117,7 @@ function InvestMenu(props) {
                         <input type="text" id="withdraw-investor-currency" name="deposit-investor-currency" min="0"
                                placeholder="Currency " required/>
                         <input type="number" id="withdraw-investor-amount" name="deposit-investor-amount" min="0"
-                               placeholder="Amount " required/>
+                               placeholder="Amount " step="0.01" required/>
 
                         <button className="create-new-project-btn" type="submit" id="create-new-project-btn">Submit
                         </button>
@@ -136,7 +136,6 @@ function InvestorPortfolio(props) {
     if (affiliation === 'systemAdmin') {
         return (
             <div className="wallet-info detailed-investor-portfolio">
-                <h3>Portfolio</h3>
                 <div className="portfolio">
                     <Portfolio investorFullName={props.investorFullName}/>
                 </div>

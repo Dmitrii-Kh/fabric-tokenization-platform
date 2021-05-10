@@ -309,7 +309,7 @@ class TokenizationPlatformStorage extends Contract {
 
     async depositCompanyProject(ctx, companyName, projectName, currency, amount){
         const identity = new ClientIdentity(ctx.stub);
-        if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
+        if (identity.cert.subject.organizationalUnitName !== 'company') {
             throw new Error('Current subject does not have access to this function');
         }
         const companiesAsBytes = await ctx.stub.getState("companies");

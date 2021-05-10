@@ -1,6 +1,6 @@
 function DepositProjectMenu(props) {
-    //system admin only
-    if (sessionStorage.getItem('affiliation') === 'systemAdmin') {
+    //company only
+    if (sessionStorage.getItem('affiliation') === 'company') {
         return (
             <div className="create-new-project-container deposit-project-btn">
                 <button className="collapsible" onClick={() => {
@@ -56,7 +56,7 @@ function DepositProjectMenu(props) {
                         <input type="text" id="deposit-project-currency" name="deposit-project-currency" min="0"
                                placeholder="Currency " required/>
                         <input type="number" id="deposit-project-amount" name="deposit-project-amount" min="0"
-                               placeholder="Amount " required/>
+                               placeholder="Amount " step="0.01" required/>
 
                         <button className="create-new-project-btn" type="submit" id="create-new-project-btn">Submit
                         </button>
