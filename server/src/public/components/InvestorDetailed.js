@@ -87,11 +87,17 @@ function InvestMenu(props) {
 
                             const depositCurrency = document.getElementById("withdraw-investor-currency").value;
                             const depositAmount = document.getElementById("withdraw-investor-amount").value;
-
+                            const selectedOption = document.getElementById("project-select").value.split(',');
+                            const company = selectedOption[0];
+                            const project = selectedOption[1];
+                            console.log(company)
+                            console.log(project)
                             let body = {
                                 certificate: sessionStorage.getItem('cert'),
                                 privateKey: sessionStorage.getItem('prKey'),
                                 investorFullName: props.investorFullName,
+                                companyName: company,
+                                projectName: project,
                                 currency: depositCurrency,
                                 amount: depositAmount
                             };
@@ -118,7 +124,11 @@ function InvestMenu(props) {
                                placeholder="Currency " required/>
                         <input type="number" id="withdraw-investor-amount" name="deposit-investor-amount" min="0"
                                placeholder="Amount " step="0.01" required/>
-
+                        <select name="project-select" id="project-select">
+                            {props.projects.map((project) => (
+                                <option value={`${project.companyName},${project.projectName}`}>${project.companyName}, ${project.projectName}</option>
+                            ))}
+                        </select>
                         <button className="create-new-project-btn" type="submit" id="create-new-project-btn">Submit
                         </button>
                     </form>
@@ -149,6 +159,7 @@ class InvestorDetailed extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            projects: undefined,
             investorFullName: undefined
         };
 
@@ -161,11 +172,21 @@ class InvestorDetailed extends React.Component {
 
     componentDidMount() {
         this.handleChange(window.location.href.split('/')[5]);
+        fetch("/api/v1/platform/getAllProjects", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')})
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                console.log(res);
+                this.setState({projects: res});
+            });
     }
 
 
     render() {
-        if (this.state.investorFullName) {
+        if (this.state.investorFullName && this.state.projects) {
 
             return (
 
@@ -180,6 +201,7 @@ class InvestorDetailed extends React.Component {
                         />
                         <InvestMenu
                             investorFullName={this.state.investorFullName}
+                            projects={this.state.projects}
                         />
                     </div>
 
