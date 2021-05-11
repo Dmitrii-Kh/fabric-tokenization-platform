@@ -126,7 +126,7 @@ function InvestMenu(props) {
                                placeholder="Amount " step="0.01" required/>
                         <select name="project-select" id="project-select">
                             {props.projects.map((project) => (
-                                <option value={`${project.companyName},${project.projectName}`}>${project.companyName}, ${project.projectName}</option>
+                                <option value={`${project.companyName},${project.projectName}`}>{project.companyName}, {project.projectName}</option>
                             ))}
                         </select>
                         <button className="create-new-project-btn" type="submit" id="create-new-project-btn">Submit

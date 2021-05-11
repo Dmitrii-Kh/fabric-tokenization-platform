@@ -21,7 +21,7 @@ function UserNav() {
             url = `validators/${cn}`
             break;
         case 'systemAdmin':
-            url = `admin/investors`
+            url = `admin`
             break;
         case 'company':
             url = `companies/${cn}`
@@ -32,8 +32,9 @@ function UserNav() {
     if(sessionStorage.getItem('affiliation') === 'systemAdmin') {
         return (
             <nav>
-                <a href={`/${url}`}>Investors</a>
+                <a href={`/${url}/investors`}>Investors</a>
                 <a href="/projects">Projects</a>
+                <a href={`/${url}/validators`}>Validators</a>
             </nav>
         )
     }

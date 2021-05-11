@@ -142,7 +142,7 @@ class TokenizationPlatformStorage extends Contract {
 
         const newRecordInBytes = Buffer.from(JSON.stringify(companiesAsObject));
         await ctx.stub.putState("companies", newRecordInBytes);
-        return JSON.stringify(companiesAsObject[identity.cert.subject.commonName], null, 2);
+        return JSON.stringify({data: ctx.stub.getTxID()}, null, 2);
 
     }
 
@@ -366,6 +366,19 @@ class TokenizationPlatformStorage extends Contract {
         }
     }
 
+    async getValidatorApprovals(ctx, validatorFullName) {
+        validatorFullName = validatorFullName || "";
+        const identity = new ClientIdentity(ctx.stub);
+        const validatorsAsBytes = await ctx.stub.getState("validators");
+        const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
+        if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
+            return JSON.stringify(validatorsAsObject[validatorFullName].approvedProjects, null, 2);
+        }
+        if(identity.cert.subject.organizationalUnitName === 'validator') {
+            return JSON.stringify(validatorsAsObject[identity.cert.subject.commonName].approvedProjects, null, 2);
+        }
+    }
+
     async getProjectWallet(ctx, projectName, companyName) {
         companyName = companyName || "";
         const identity = new ClientIdentity(ctx.stub);
@@ -459,7 +472,7 @@ class TokenizationPlatformStorage extends Contract {
 
         if(approved) {
             try {
-               await this.addApprovedProject(ctx, companyName, projectName);
+               await this.addApprovedProject(ctx, companyName, projectName, ctx.stub.getTxID());
             } catch (e) {
                 throw new Error("Error during adding project to validator's list!");
             }
@@ -467,11 +480,11 @@ class TokenizationPlatformStorage extends Contract {
 
         const newRecordInBytes = Buffer.from(JSON.stringify(companiesAsObject));
         await ctx.stub.putState("companies", newRecordInBytes);
-        return JSON.stringify(companiesAsObject[companyName], null, 2);
+        return JSON.stringify({data: ctx.stub.getTxID()}, null, 2);
 
     }
 
-    async addApprovedProject(ctx, companyName, projectName) {
+    async addApprovedProject(ctx, companyName, projectName, txId) {
         const identity = new ClientIdentity(ctx.stub);
         const validatorsAsBytes = await ctx.stub.getState("validators");
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
@@ -482,7 +495,8 @@ class TokenizationPlatformStorage extends Contract {
         validator.approvedProjects.push({
             companyName: companyName,
             projectName: projectName,
-            approvalDate: Date.now()
+            approvalDate: Date.now(),
+            transactionId: txId
         })
 
         let wallet = validatorsAsObject[identity.cert.subject.commonName].wallet;
@@ -519,6 +533,18 @@ class TokenizationPlatformStorage extends Contract {
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
 
         return JSON.stringify(Object.keys(investorsAsObject), null, 2);
+    }
+
+
+    async getValidators(ctx) {
+        const identity = new ClientIdentity(ctx.stub);
+        if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
+            throw new Error('Current subject does not have access to this function');
+        }
+        const validatorsAsBytes = await ctx.stub.getState("validators");
+        const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
+
+        return JSON.stringify(Object.keys(validatorsAsObject), null, 2);
     }
 
 

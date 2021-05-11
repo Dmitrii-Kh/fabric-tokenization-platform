@@ -136,6 +136,10 @@ class Projects extends React.Component {
 
     render() {
         if (this.state.projects) {
+            if (this.state.projects.length === 0) {
+                return <div className="no-projects-alert">No projects yet!</div>
+            }
+
             return (
 
                 <div className="projects-container">

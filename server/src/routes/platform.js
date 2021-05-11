@@ -147,7 +147,7 @@ export const signInToPlatform = async (certificate, privateKey) => {
     }
 };
 
-// ************************************************8
+// *************************************************
 
 const createNewProject = async (req, res) => {
     const {certificate, privateKey, projectName, projectDescription, emission, tokenName, priceInUSDT} = req.body;
@@ -159,7 +159,7 @@ const createNewProject = async (req, res) => {
             props: [projectName, projectDescription, emission, tokenName, priceInUSDT]
         })
         gateway.disconnect()
-        res.status(201).json({data: result})
+        res.status(201).json(result)
     } catch (e) {
         res.status(400).json({message: e.message});
     }
@@ -254,6 +254,24 @@ const getValidatorWallet = async (req, res) => {
 };
 
 
+const getValidatorApprovals = async (req, res) => {
+    let {certificate, privateKey, validatorFullName} = req.body;
+    validatorFullName = validatorFullName || "";
+    try {
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const gateway = await getConnectedWallet('Org1MSP', mixin);
+        const result = await sendTransaction(gateway, {
+            name: 'getValidatorApprovals',
+            props: [validatorFullName]
+        })
+        gateway.disconnect()
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({message: e.message});
+    }
+};
+
+
 const getProjectWallet = async (req, res) => {
     let {certificate, privateKey, projectName, companyName} = req.body;
     companyName = companyName || ""
@@ -326,6 +344,23 @@ const getInvestors = async (req, res) => {
 };
 
 
+const getValidators = async (req, res) => {
+    let {certificate, privateKey} = req.body;
+
+    try {
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const gateway = await getConnectedWallet('Org1MSP', mixin);
+        const result = await sendTransaction(gateway, {
+            name: 'getValidators',
+            props: []
+        })
+        gateway.disconnect()
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({message: e.message});
+    }
+};
+
 
 const investToProject = async (req, res) => {
     let {certificate, privateKey, investorFullName, companyName, projectName, currency, amount} = req.body;
@@ -365,7 +400,11 @@ router.post('/depositCompanyProject', depositCompanyProject);
 router.post('/approveProject', approveProject);
 
 router.post('/getInvestors', getInvestors);
+router.post('/getValidators', getValidators);
 
 router.post('/investToProject', investToProject);
+
+router.post('/getValidatorApprovals', getValidatorApprovals);
+
 
 export default router;
