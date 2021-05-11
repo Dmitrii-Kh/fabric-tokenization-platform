@@ -1,6 +1,7 @@
 import express from 'express';
 import {X509WalletMixin} from 'fabric-network';
 import {getCA, getConnectedWallet, sendTransaction} from '../utils';
+import fs from "fs";
 
 const router = express.Router();
 
@@ -373,7 +374,43 @@ const investToProject = async (req, res) => {
             props: [investorFullName, companyName, projectName, currency, amount]
         })
         gateway.disconnect()
-        res.status(201).json(result)
+        //res.status(201).json(result)
+
+
+        const { createCanvas } = require('canvas');
+
+        const width = 1200
+        const height = 630
+
+        const canvas = createCanvas(width, height)
+        const context = canvas.getContext('2d')
+
+        context.fillStyle = '#000'
+        context.fillRect(0, 0, width, height)
+
+        context.font = 'bold 15pt Menlo'
+        context.textAlign = 'center'
+        context.textBaseline = 'top'
+        //context.fillStyle = '#3574d4'
+        context.fillStyle = '#fff'
+
+        const text = "This certificate approves that";
+        const text2 = `${investorFullName} successfully invested ${amount}${currency} in ${companyName}, ${projectName}`;
+        const text3 = `Transaction ID: ${result.data}`;
+
+        context.fillText(text, 600, 170)
+        context.fillText(text2, 600, 200)
+        context.fillText(text3, 600, 260)
+
+
+        context.font = 'bold 20pt Menlo'
+        context.fillText('{tokenizationPlatformName}', 600, 530)
+        const buffer = canvas.toBuffer('image/jpeg')
+
+        fs.writeFileSync('./investCert.jpeg', buffer)
+
+        res.download("./investCert.jpeg");
+
     } catch (e) {
         res.status(400).json({message: e.message});
     }

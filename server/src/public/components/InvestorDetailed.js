@@ -109,13 +109,43 @@ function InvestMenu(props) {
                                 body: JSON.stringify(body)
                             });
 
-                            const responseObj = await response.json();
-                            if (responseObj.message) {
-                                alert(responseObj.message);
-                                console.log(responseObj.error);
-                            } else {
+                            const responseObj = await response.blob();
+                            // if (responseObj.message) {
+                            //     alert(responseObj.message);
+                            //     console.log(responseObj.error);
+                            // } else {
+
+                            let blob = new Blob([responseObj], {type: "image/jpeg"});
+                            if(blob.size > 0) {
+
+                                    // It is necessary to create a new blob object with mime-type explicitly set
+                                    // otherwise only Chrome works like it should
+                                    let newBlob = new Blob([blob], {type: "image/jpeg"})
+
+                                    // IE doesn't allow using a blob object directly as link href
+                                    // instead it is necessary to use msSaveOrOpenBlob
+                                    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                                        window.navigator.msSaveOrOpenBlob(newBlob);
+                                        return;
+                                    }
+
+                                    // For other browsers:
+                                    // Create a link pointing to the ObjectURL containing the blob.
+                                    const data = window.URL.createObjectURL(newBlob);
+                                    let link = document.createElement('a');
+                                    link.href = data;
+                                    link.download = props.investorFullName + company + project + ".jpeg";
+                                    link.click();
+
+                                    setTimeout(function(){
+                                        // For Firefox it is necessary to delay revoking the ObjectURL
+                                        window.URL.revokeObjectURL(data);
+                                    }, 100);
+
+
                                 alert('Success!');
                             }
+                           // }
                         } catch (e) {
                             console.log(e);
                         }

@@ -650,7 +650,7 @@ class TokenizationPlatformStorage extends Contract {
         await ctx.stub.putState("investors", Buffer.from(JSON.stringify(investorsAsObject)));
         await ctx.stub.putState("companies", Buffer.from(JSON.stringify(companiesAsObject)));
 
-        return JSON.stringify(investorsAsObject[investorFullName], null, 2);
+        return JSON.stringify({data: ctx.stub.getTxID()}, null, 2);
     }
 
 
