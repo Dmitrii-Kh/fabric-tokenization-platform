@@ -152,7 +152,11 @@ class TokenizationPlatformStorage extends Contract {
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
 
         if (identity.cert.subject.organizationalUnitName === 'company') {
-            return JSON.stringify(companiesAsObject[identity.cert.subject.commonName].projects, null, 2);
+            let result = [];
+            companiesAsObject[identity.cert.subject.commonName].projects.forEach(project => {
+                result.push({ companyName: identity.cert.subject.commonName, ...project })
+            })
+            return JSON.stringify(result, null, 2);
         }
 
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
@@ -164,13 +168,7 @@ class TokenizationPlatformStorage extends Contract {
                         result.push(
                             {
                                 companyName: key,
-                                projectName: project.projectName,
-                                projectDescription: project.projectDescription,
-                                emission: project.emission,
-                                supply: project.supply,
-                                tokenName: project.tokenName,
-                                priceInUSDT: project.priceInUSDT,
-                                approved: project.approved
+                                ...project
                             }
                         )
                     })
@@ -190,12 +188,7 @@ class TokenizationPlatformStorage extends Contract {
                             result.push(
                                 {
                                     companyName: key,
-                                    projectName: project.projectName,
-                                    projectDescription: project.projectDescription,
-                                    emission: project.emission,
-                                    tokenName: project.tokenName,
-                                    priceInUSDT: project.priceInUSDT,
-                                    approved: project.approved
+                                   ...project
                                 }
                             )
                         }
@@ -309,7 +302,7 @@ class TokenizationPlatformStorage extends Contract {
 
     async depositCompanyProject(ctx, companyName, projectName, currency, amount){
         const identity = new ClientIdentity(ctx.stub);
-        if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
+        if (identity.cert.subject.organizationalUnitName !== 'company') {
             throw new Error('Current subject does not have access to this function');
         }
         const companiesAsBytes = await ctx.stub.getState("companies");

@@ -70,7 +70,7 @@ function ApprovalInfo(props) {
 }
 
 const Project = (props) => {
-    const {companyName, projectName, projectDescription, emission, tokenName, priceInUSDT, approved} = props;
+    const {companyName, projectName, projectDescription, emission, supply, tokenName, priceInUSDT, approved} = props;
     return (
         <div className="project" id={projectName}>
 
@@ -80,10 +80,14 @@ const Project = (props) => {
             <div className="project-body">
                 <p className="project-description">{projectDescription}</p>
                 <div className="project-additional-info">
-                    <h4>Emission: <b>{emission} {tokenName}</b></h4>
+                    <h4>Total Supply: <b>{emission} {tokenName}</b></h4>
                     <h4>Price: <b>{priceInUSDT} USDT</b></h4>
                 </div>
-                <ApprovalInfo approved={approved}/>
+                <div className="project-additional-info">
+                    <h4>Supply: <b>{supply || 0} {tokenName}</b></h4>
+                    <ApprovalInfo approved={approved}/>
+                </div>
+
             </div>
             <div className="floating-up-div">
                 <a className="more-info-ref" href={`/projects/${companyName}/${projectName}`}>More info</a>
