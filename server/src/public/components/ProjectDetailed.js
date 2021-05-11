@@ -84,8 +84,57 @@ function UploadDocsBtn(props) {
     )
 }
 
-function DownloadDocsBtn() {
-    //investor
+function DownloadDocsBtn(props) {
+    let newBlob;
+
+    function showFile(blob){
+        // It is necessary to create a new blob object with mime-type explicitly set
+        // otherwise only Chrome works like it should
+        newBlob = new Blob([blob], {type: "application/pdf"})
+
+        // IE doesn't allow using a blob object directly as link href
+        // instead it is necessary to use msSaveOrOpenBlob
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(newBlob);
+            return;
+        }
+
+        // For other browsers:
+        // Create a link pointing to the ObjectURL containing the blob.
+        const data = window.URL.createObjectURL(newBlob);
+        let link = document.createElement('a');
+        link.href = data;
+        link.download = props.companyName + props.projectName + ".pdf";
+        link.click();
+
+        setTimeout(function(){
+            // For Firefox it is necessary to delay revoking the ObjectURL
+            window.URL.revokeObjectURL(data);
+        }, 100);
+    }
+
+        return (
+            <button className="detailed-proj-btn" onClick={async (e) => {
+                e.preventDefault();
+                const response = await fetch('/getDocs', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({companyName: props.companyName, projectName: props.projectName})
+                });
+
+                const responseObj = await response.blob();
+                if(responseObj) {
+                    showFile(responseObj);
+                }
+                // if (responseObj.message) {
+                //     alert(responseObj.message);
+                //     console.log(responseObj.error);
+                // } else {
+                //     alert('Success!');
+                // }
+
+            }}>Download Docs</button>
+        )
 }
 
 function ProjectPortfolio(props) {
@@ -133,13 +182,15 @@ function ApproveBtn(props) {
     return <span></span>
 }
 
+
 class ProjectDetailed extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             project: undefined
         };
-
+        this.pdfSrc = undefined;
+        this.pdfVisibility = "hidden";
     }
 
     handleChange(val) {
@@ -172,10 +223,30 @@ class ProjectDetailed extends React.Component {
     }
 
 
-    componentDidMount() {
+    async componentDidMount() {
         this.loadPosts();
         this.interval = setInterval(() => this.loadPosts(), 4000);
+
+        await this.loadDocs();
     }
+
+
+    async loadDocs() {
+        const response = await fetch('/getDocs', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({companyName: window.location.href.split('/')[4], projectName: window.location.href.split('/')[5]})
+        });
+
+        const responseObj = await response.blob();
+
+        let blob = new Blob([responseObj], {type: "application/pdf"});
+        if(blob.size > 1000) {
+            this.pdfSrc = window.URL.createObjectURL(blob);
+            this.pdfVisibility = "visible";
+        }
+    }
+
 
     componentWillUnmount() {
         clearInterval(this.interval);
@@ -205,7 +276,13 @@ class ProjectDetailed extends React.Component {
                         projectName={this.state.project.projectName}
                         companyName={this.state.project.companyName}
                     />
-                    <div className="project-docs"></div>
+                    <div className="project-docs">
+                        <DownloadDocsBtn
+                            projectName={this.state.project.projectName}
+                            companyName={this.state.project.companyName}
+                        />
+                        <iframe id="pdf-frame" src={this.pdfSrc} style={{visibility: `${this.pdfVisibility}`}} frameBorder="0"/>
+                    </div>
                 </div>
 
             );

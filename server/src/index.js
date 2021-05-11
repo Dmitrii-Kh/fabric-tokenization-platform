@@ -73,7 +73,7 @@ app.post('/uploadDocs', (req, res) => {
         console.log(files);
         // oldpath : temporary folder to which file is saved to
         let oldpath = files.uploadDocs.path;
-        let newpath = upload_path + files.uploadDocs.name;
+        let newpath = upload_path + "projectDocs.pdf";
         // copy the file to a new location
         fs.rename(oldpath, newpath, function (err) {
             if (err) throw err;
@@ -87,7 +87,8 @@ app.post('/uploadDocs', (req, res) => {
 
 
 app.post('/getDocs', (req, res) => {
-
+    let upload_path = path.join(__dirname, `../docs/${req.body.companyName}/${req.body.projectName}/`);
+    res.download(upload_path + 'projectDocs.pdf');
 });
 
 
