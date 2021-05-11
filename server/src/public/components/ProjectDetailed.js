@@ -68,8 +68,20 @@ function DepositProjectMenu(props) {
     return <span/>
 }
 
-function UploadDocsBtn() {
+function UploadDocsBtn(props) {
     //company
+    return (
+        <form className="project-detailed-btn-container" method="post" action="/uploadDocs" encType="multipart/form-data">
+            <label className="upload-docs-label" htmlFor="uploadDocs">Select Docs
+                <input type="file" id="uploadDocs" name="uploadDocs" placeholder="Docs"/>
+            </label>
+            <input type="text" id="uploadDocsCompany" style={{display: "none"}} name="uploadDocsCompany"
+                   value={props.companyName}/>
+            <input type="text" id="uploadDocsProject" style={{display: "none"}} name="uploadDocsProject"
+                   value={props.projectName}/>
+            <input className="upload-download-input" type="submit" value="Upload"/>
+        </form>
+    )
 }
 
 function DownloadDocsBtn() {
@@ -93,30 +105,30 @@ function ProjectPortfolio(props) {
 
 function ApproveBtn(props) {
     //validator
-    if(sessionStorage.getItem("affiliation") === 'validator' && (props.approved === false || props.approved === "false")){
+    if (sessionStorage.getItem("affiliation") === 'validator' && (props.approved === false || props.approved === "false")) {
         let body = {
             certificate: sessionStorage.getItem('cert'),
             privateKey: sessionStorage.getItem('prKey'),
             companyName: props.companyName,
             projectName: props.projectName
         };
-     return (
-         <button className="detailed-proj-btn" onClick={async (e) => {
-             const response = await fetch('/api/v1/platform/approveProject', {
-                 method: 'POST',
-                 headers: {'Content-Type': 'application/json'},
-                 body: JSON.stringify(body)
-             });
+        return (
+            <button className="detailed-proj-btn" onClick={async (e) => {
+                const response = await fetch('/api/v1/platform/approveProject', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body)
+                });
 
-             const responseObj = await response.json();
-             if (responseObj.message) {
-                 alert(responseObj.message);
-                 console.log(responseObj.error);
-             } else {
-                 alert('Success!');
-             }
-         }}>Approve Project</button>
-     )
+                const responseObj = await response.json();
+                if (responseObj.message) {
+                    alert(responseObj.message);
+                    console.log(responseObj.error);
+                } else {
+                    alert('Success!');
+                }
+            }}>Approve Project</button>
+        )
     }
     return <span></span>
 }
@@ -141,7 +153,7 @@ class ProjectDetailed extends React.Component {
             privateKey: sessionStorage.getItem('prKey'),
             projectName: window.location.href.split('/')[5]
         }
-        if(sessionStorage.getItem('affiliation') !== 'company') {
+        if (sessionStorage.getItem('affiliation') !== 'company') {
             body["companyName"] = window.location.href.split('/')[4];
         }
 
@@ -188,6 +200,10 @@ class ProjectDetailed extends React.Component {
                         projectName={this.state.project.projectName}
                         companyName={this.state.project.companyName}
                         approved={this.state.project.approved}
+                    />
+                    <UploadDocsBtn
+                        projectName={this.state.project.projectName}
+                        companyName={this.state.project.companyName}
                     />
                     <div className="project-docs"></div>
                 </div>

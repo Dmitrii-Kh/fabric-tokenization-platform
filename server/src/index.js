@@ -2,6 +2,8 @@ import express from 'express'
 import {auth, platform} from './routes';
 import {createWireframe} from './routes/platform';
 const path = require('path');
+const fs = require('fs');
+const formidable = require('formidable');
 const app = express();
 app.use(express.urlencoded());
 app.use(express.static(path.join(__dirname, '/public')));
@@ -54,6 +56,38 @@ app.get('/admin/investors', (req, res) => {
 
 app.get('/admin/investors/:investorName', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'investorDetailed.html'));
+});
+
+
+app.post('/uploadDocs', (req, res) => {
+
+    let form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+
+        let upload_path = path.join(__dirname, `../docs/${fields.uploadDocsCompany}/${fields.uploadDocsProject}/`);
+        // console.log(upload_path);
+        if (!fs.existsSync(upload_path)){
+            fs.mkdirSync(upload_path, {recursive: true});   //create directories if does not exist
+        }
+        console.log(fields);
+        console.log(files);
+        // oldpath : temporary folder to which file is saved to
+        let oldpath = files.uploadDocs.path;
+        let newpath = upload_path + files.uploadDocs.name;
+        // copy the file to a new location
+        fs.rename(oldpath, newpath, function (err) {
+            if (err) throw err;
+            // you may respond with another html page
+            res.write('<h1 style="text-align: center; width: 100%; margin-top: 45px;">File uploaded successfully!<h1>');
+            res.end();
+        });
+    });
+
+});
+
+
+app.post('/getDocs', (req, res) => {
+
 });
 
 
