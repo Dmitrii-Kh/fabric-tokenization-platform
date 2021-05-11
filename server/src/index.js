@@ -59,6 +59,14 @@ app.get('/admin/investors/:investorName', (req, res) => {
 });
 
 
+app.get('/admin/validators', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'validatorsList.html'));
+});
+
+app.get('/admin/validators/:validatorName', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'validatorDetailed.html'));
+});
+
 app.post('/uploadDocs', (req, res) => {
 
     let form = new formidable.IncomingForm();

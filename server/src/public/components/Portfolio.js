@@ -116,4 +116,4 @@ class Portfolio extends React.Component {
 }
 
 
-ReactDOM.render(<Portfolio/>, document.getElementsByClassName('portfolio')[0]);
+// ReactDOM.render(<Portfolio/>, document.getElementsByClassName('portfolio')[0]);

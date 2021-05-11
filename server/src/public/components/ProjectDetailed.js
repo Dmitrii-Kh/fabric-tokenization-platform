@@ -70,18 +70,21 @@ function DepositProjectMenu(props) {
 
 function UploadDocsBtn(props) {
     //company
-    return (
-        <form className="project-detailed-btn-container" method="post" action="/uploadDocs" encType="multipart/form-data">
-            <label className="upload-docs-label" htmlFor="uploadDocs">Select Docs
-                <input type="file" id="uploadDocs" name="uploadDocs" placeholder="Docs"/>
-            </label>
-            <input type="text" id="uploadDocsCompany" style={{display: "none"}} name="uploadDocsCompany"
-                   value={props.companyName}/>
-            <input type="text" id="uploadDocsProject" style={{display: "none"}} name="uploadDocsProject"
-                   value={props.projectName}/>
-            <input className="upload-download-input" type="submit" value="Upload"/>
-        </form>
-    )
+    if(sessionStorage.getItem('affiliation') === 'company') {
+        return (
+            <form className="project-detailed-btn-container" method="post" action="/uploadDocs" encType="multipart/form-data">
+                <label className="upload-docs-label" htmlFor="uploadDocs">Select Docs
+                    <input type="file" id="uploadDocs" name="uploadDocs" placeholder="Docs"/>
+                </label>
+                <input type="text" id="uploadDocsCompany" style={{display: "none"}} name="uploadDocsCompany"
+                       value={props.companyName}/>
+                <input type="text" id="uploadDocsProject" style={{display: "none"}} name="uploadDocsProject"
+                       value={props.projectName}/>
+                <input className="upload-download-input" type="submit" value="Upload"/>
+            </form>
+        )
+    }
+    return <span></span>
 }
 
 function DownloadDocsBtn(props) {
@@ -162,25 +165,29 @@ function ApproveBtn(props) {
             projectName: props.projectName
         };
         return (
-            <button className="detailed-proj-btn" onClick={async (e) => {
-                const response = await fetch('/api/v1/platform/approveProject', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(body)
-                });
 
-                const responseObj = await response.json();
-                if (responseObj.message) {
-                    alert(responseObj.message);
-                    console.log(responseObj.error);
-                } else {
-                    alert('Success!');
-                }
-            }}>Approve Project</button>
+                <button className="detailed-proj-btn" onClick={async (e) => {
+                    e.preventDefault();
+                    const response = await fetch('/api/v1/platform/approveProject', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(body)
+                    });
+
+                    const responseObj = await response.json();
+                    if (responseObj.message) {
+                        alert(responseObj.message);
+                        console.log(responseObj.error);
+                    } else {
+                        alert('Successfully approved!');
+                    }
+                }}>Approve Project</button>
+
         )
     }
     return <span></span>
 }
+
 
 
 class ProjectDetailed extends React.Component {

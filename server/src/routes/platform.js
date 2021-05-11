@@ -1,6 +1,7 @@
 import express from 'express';
 import {X509WalletMixin} from 'fabric-network';
 import {getCA, getConnectedWallet, sendTransaction} from '../utils';
+import fs from "fs";
 
 const router = express.Router();
 
@@ -147,7 +148,7 @@ export const signInToPlatform = async (certificate, privateKey) => {
     }
 };
 
-// ************************************************8
+// *************************************************
 
 const createNewProject = async (req, res) => {
     const {certificate, privateKey, projectName, projectDescription, emission, tokenName, priceInUSDT} = req.body;
@@ -159,7 +160,7 @@ const createNewProject = async (req, res) => {
             props: [projectName, projectDescription, emission, tokenName, priceInUSDT]
         })
         gateway.disconnect()
-        res.status(201).json({data: result})
+        res.status(201).json(result)
     } catch (e) {
         res.status(400).json({message: e.message});
     }
@@ -254,6 +255,24 @@ const getValidatorWallet = async (req, res) => {
 };
 
 
+const getValidatorApprovals = async (req, res) => {
+    let {certificate, privateKey, validatorFullName} = req.body;
+    validatorFullName = validatorFullName || "";
+    try {
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const gateway = await getConnectedWallet('Org1MSP', mixin);
+        const result = await sendTransaction(gateway, {
+            name: 'getValidatorApprovals',
+            props: [validatorFullName]
+        })
+        gateway.disconnect()
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({message: e.message});
+    }
+};
+
+
 const getProjectWallet = async (req, res) => {
     let {certificate, privateKey, projectName, companyName} = req.body;
     companyName = companyName || ""
@@ -326,6 +345,23 @@ const getInvestors = async (req, res) => {
 };
 
 
+const getValidators = async (req, res) => {
+    let {certificate, privateKey} = req.body;
+
+    try {
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const gateway = await getConnectedWallet('Org1MSP', mixin);
+        const result = await sendTransaction(gateway, {
+            name: 'getValidators',
+            props: []
+        })
+        gateway.disconnect()
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({message: e.message});
+    }
+};
+
 
 const investToProject = async (req, res) => {
     let {certificate, privateKey, investorFullName, companyName, projectName, currency, amount} = req.body;
@@ -338,7 +374,43 @@ const investToProject = async (req, res) => {
             props: [investorFullName, companyName, projectName, currency, amount]
         })
         gateway.disconnect()
-        res.status(201).json(result)
+        //res.status(201).json(result)
+
+
+        const { createCanvas } = require('canvas');
+
+        const width = 1200
+        const height = 630
+
+        const canvas = createCanvas(width, height)
+        const context = canvas.getContext('2d')
+
+        context.fillStyle = '#000'
+        context.fillRect(0, 0, width, height)
+
+        context.font = 'bold 15pt Menlo'
+        context.textAlign = 'center'
+        context.textBaseline = 'top'
+        //context.fillStyle = '#3574d4'
+        context.fillStyle = '#fff'
+
+        const text = "This certificate approves that";
+        const text2 = `${investorFullName} successfully invested ${amount}${currency} in ${companyName}, ${projectName}`;
+        const text3 = `Transaction ID: ${result.data}`;
+
+        context.fillText(text, 600, 170)
+        context.fillText(text2, 600, 200)
+        context.fillText(text3, 600, 260)
+
+
+        context.font = 'bold 20pt Menlo'
+        context.fillText('{tokenizationPlatformName}', 600, 530)
+        const buffer = canvas.toBuffer('image/jpeg')
+
+        fs.writeFileSync('./investCert.jpeg', buffer)
+
+        res.download("./investCert.jpeg");
+
     } catch (e) {
         res.status(400).json({message: e.message});
     }
@@ -365,7 +437,11 @@ router.post('/depositCompanyProject', depositCompanyProject);
 router.post('/approveProject', approveProject);
 
 router.post('/getInvestors', getInvestors);
+router.post('/getValidators', getValidators);
 
 router.post('/investToProject', investToProject);
+
+router.post('/getValidatorApprovals', getValidatorApprovals);
+
 
 export default router;
