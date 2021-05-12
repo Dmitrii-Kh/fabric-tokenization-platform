@@ -417,6 +417,23 @@ const investToProject = async (req, res) => {
 };
 
 
+const getCompanyTotalInvestments = async (req, res) => {
+    const {certificate, privateKey} = req.body;
+    try {
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const gateway = await getConnectedWallet('Org1MSP', mixin);
+        const result = await sendTransaction(gateway, {
+            name: 'companyTotalInvestments',
+            props: []
+        })
+        gateway.disconnect()
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({message: e.message});
+    }
+};
+
+
 
 router.get('/getInvestorsData', getInvestorsData);
 router.get('/getValidatorsData', getValidatorsData);
@@ -442,6 +459,8 @@ router.post('/getValidators', getValidators);
 router.post('/investToProject', investToProject);
 
 router.post('/getValidatorApprovals', getValidatorApprovals);
+
+router.post('/getCompanyTotalInvestments', getCompanyTotalInvestments);
 
 
 export default router;

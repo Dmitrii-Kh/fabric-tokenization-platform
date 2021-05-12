@@ -145,10 +145,10 @@ class Projects extends React.Component {
                     return parseInt(b[key]) - parseInt(a[key]);
                 case "approvedFirst":
                     key = approved;
-                    return a[key].toString() < b[key].toString() ? -1 : a[key].toString() > b[key].toString() ? 1 : 0;
+                    return a[key].toString() > b[key].toString() ? -1 : a[key].toString() < b[key].toString() ? 1 : 0;
                 case "notApprovedFirst":
                     key = approved;
-                    return a[key].toString() > b[key].toString() ? -1 : a[key].toString() < b[key].toString() ? 1 : 0;
+                    return a[key].toString() < b[key].toString() ? -1 : a[key].toString() > b[key].toString() ? 1 : 0;
             }
         })
         this.handleChange(sorted);

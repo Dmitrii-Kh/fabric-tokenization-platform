@@ -67,6 +67,7 @@ function ApprovalInfo(props) {
            <div className="approval-info">Project approved: <b>{props.approved.toString()}</b></div>
        )
    }
+   return <span></span>
 }
 
 const Project = (props) => {

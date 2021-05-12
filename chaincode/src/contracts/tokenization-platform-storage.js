@@ -654,6 +654,28 @@ class TokenizationPlatformStorage extends Contract {
         return JSON.stringify({data: ctx.stub.getTxID()}, null, 2);
     }
 
+    async companyTotalInvestments(ctx) {
+        const identity = new ClientIdentity(ctx.stub);
+        if (identity.cert.subject.organizationalUnitName !== 'company') {
+            throw new Error('Current subject does not have access to this function');
+        }
+
+        const companiesAsBytes = await ctx.stub.getState("companies");
+        const companiesAsObject = JSON.parse(companiesAsBytes.toString());
+
+        let result = 0;
+        companiesAsObject[identity.cert.subject.commonName].projects.forEach(pr => {
+            pr.wallet.forEach(rec => {
+                if(rec.currencyName === "USDT") {
+                    result += Number(rec.amount);
+                }
+            })
+        })
+
+
+        return JSON.stringify([{currencyName: 'USDT', amount: result}], null, 2);
+    }
+
 
     //deprecated
     async createStudentRecord(ctx, studentEmail, fullName) {
