@@ -113,7 +113,7 @@ class TokenizationPlatformStorage extends Contract {
     }
 
 
-    async createNewProject(ctx, projectName, projectDescription, emission, tokenName, priceInUSDT) {
+    async createNewProject(ctx, projectName, projectDescription, totalSupply, tokenName, priceInUSDT) {
         const identity = new ClientIdentity(ctx.stub);
         if (identity.cert.subject.organizationalUnitName !== 'company') {
             throw new Error('Current subject does not have access to this function');
@@ -127,10 +127,11 @@ class TokenizationPlatformStorage extends Contract {
             {
                 projectName: projectName,
                 projectDescription: projectDescription,
-                emission: emission,
+                totalSupply: totalSupply,
+                supply: 0,
                 tokenName: tokenName,
                 priceInUSDT: priceInUSDT,
-                approved: false,
+                approved: "false",
                 wallet: [
                     {
                         currencyName: "USDT",
@@ -457,7 +458,7 @@ class TokenizationPlatformStorage extends Contract {
                                 return JSON.stringify({message: "Project does not possess enough USDT"}, null, 2);
                             } else {
                                 record.amount = Number(record.amount) - Number(VALIDATOR_FEE);
-                                proj.approved = true;
+                                proj.approved = "true";
                                 approved = "true";
                             }
                             inArr = true;

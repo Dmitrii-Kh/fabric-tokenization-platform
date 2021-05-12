@@ -18,7 +18,7 @@ function AddProjectMenu() {
                         e.preventDefault();
                         try {
                             const projectName = document.getElementById("project-name").value;
-                            const projectEmission = document.getElementById("project-emission").value;
+                            const totalSupply = document.getElementById("project-totalSupply").value;
                             const description = document.getElementById("new-project-description").value;
                             const tokenName = document.getElementById("project-token-name").value;
                             const priceInUSDT = document.getElementById("project-token-price").value;
@@ -28,7 +28,7 @@ function AddProjectMenu() {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json'},
                                 body: JSON.stringify({certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey'),
-                                    projectName: projectName, projectDescription: description, emission: projectEmission, tokenName: tokenName, priceInUSDT: priceInUSDT})
+                                    projectName: projectName, projectDescription: description, totalSupply: totalSupply, tokenName: tokenName, priceInUSDT: priceInUSDT})
                             });
 
                             const responseObj = await response.json();
@@ -43,7 +43,7 @@ function AddProjectMenu() {
                         }
                     }}>
                         <input type="text" id="project-name" name="project-name" placeholder="Project Name " required/>
-                        <input type="text" id="project-emission" name="project-emission" placeholder="Emission " required/>
+                        <input type="text" id="project-totalSupply" name="project-totalSupply" placeholder="Total Supply " required/>
                         <input type="text" id="project-token-name" name="project-token-name" placeholder="Token Name " required/>
                         <input type="number" id="project-token-price" name="project-token-price" min="0" step="0.01" placeholder="Price in USDT " required/>
                         <textarea name="new-project-description" id="new-project-description" placeholder="Description" required/>
@@ -65,12 +65,15 @@ class Projects extends React.Component {
         };
 
         this.sortKey = {
-            title: 'title',
-            price: 'price',
-            startDate: 'startDate'
+            companyName: 'companyName',
+            projectName: 'projectName',
+            totalSupply: 'emission',
+            supply: 'supply',
+            priceInUSDT: 'priceInUSDT',
+            approved: 'approved'
         }
 
-        this.last_sort_key = "AZ"
+        this.last_sort_key = "companyName"
     }
 
     handleChange(val) {
@@ -89,7 +92,7 @@ class Projects extends React.Component {
                 .then((res) => {
                     this.handleChange(res);
                     console.log(res)
-                    //this.sortArr(this.last_sort_key);
+                    this.sortArr(this.last_sort_key);
                 });
 
     }
@@ -97,7 +100,7 @@ class Projects extends React.Component {
 
     componentDidMount() {
         this.loadPosts();
-        this.interval = setInterval(() => this.loadPosts(), 3000);
+        this.interval = setInterval(() => this.loadPosts(), 4000);
     }
 
     componentWillUnmount() {
@@ -106,28 +109,46 @@ class Projects extends React.Component {
 
 
     sortArr = (val) => {
-        const {title, price, startDate} = this.sortKey;
+        const {companyName, projectName, totalSupply, supply, priceInUSDT, approved} = this.sortKey;
         const sorted = this.state.projects.sort((a, b) => {
             let key;
             switch(val) {
-                case "CheapToExpensive":
-                    key = price;
-                    return parseInt(a[key]) - parseInt(b[key]);
-                case "ExpensiveToCheap":
-                    key = price;
-                    return parseInt(b[key]) - parseInt(a[key]);
-                case "DateAsc":
-                    key = startDate;
-                    return new Date(a[key]) - new Date(b[key]);
-                case "DateDesc":
-                    key = startDate;
-                    return new Date(b[key]) - new Date(a[key]);
-                case "AZ":
-                    key = title;
+                case "compNameAZ":
+                    key = companyName;
                     return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
-                case "ZA":
-                    key = title;
+                case "compNameZA":
+                    key = companyName;
                     return a[key] > b[key] ? -1 : a[key] < b[key] ? 1 : 0;
+                case "projNameAZ":
+                    key = projectName;
+                    return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+                case "projNameZA":
+                    key = projectName;
+                    return a[key] > b[key] ? -1 : a[key] < b[key] ? 1 : 0;
+                case "totalSupplyASC":
+                    key = totalSupply;
+                    return parseInt(a[key]) - parseInt(b[key]);
+                case "totalSupplyDESC":
+                    key = totalSupply;
+                    return parseInt(b[key]) - parseInt(a[key]);
+                case "supplyASC":
+                    key = supply;
+                    return parseInt(a[key]) - parseInt(b[key]);
+                case "supplyDESC":
+                    key = supply;
+                    return parseInt(b[key]) - parseInt(a[key]);
+                case "priceASC":
+                    key = priceInUSDT;
+                    return parseInt(a[key]) - parseInt(b[key]);
+                case "priceDESC":
+                    key = priceInUSDT;
+                    return parseInt(b[key]) - parseInt(a[key]);
+                case "approvedFirst":
+                    key = approved;
+                    return a[key].toString() < b[key].toString() ? -1 : a[key].toString() > b[key].toString() ? 1 : 0;
+                case "notApprovedFirst":
+                    key = approved;
+                    return a[key].toString() > b[key].toString() ? -1 : a[key].toString() < b[key].toString() ? 1 : 0;
             }
         })
         this.handleChange(sorted);
@@ -151,12 +172,18 @@ class Projects extends React.Component {
                             this.last_sort_key = sv;
                             this.sortArr(sv)
                         }}>
-                            <option value="CheapToExpensive">Cheap to Expensive</option>
-                            <option value="ExpensiveToCheap">Expensive to Cheap</option>
-                            <option value="DateAsc">Earliest First</option>
-                            <option value="DateDesc">Latest First</option>
-                            <option value="AZ">A-Z</option>
-                            <option value="ZA">Z-A</option>
+                            <option value="compNameAZ">Company Name A-Z</option>
+                            <option value="compNameZA">Company Name Z-A</option>
+                            <option value="projNameAZ">Project Name A-Z</option>
+                            <option value="projNameZA">Project Name Z-A</option>
+                            <option value="totalSupplyASC">Total Supply by ASC</option>
+                            <option value="totalSupplyDESC">Total Supply by DESC</option>
+                            <option value="supplyASC">Supply by ASC</option>
+                            <option value="supplyDESC">Supply by DESC</option>
+                            <option value="priceASC">Price by ASC</option>
+                            <option value="priceDESC">Price by DESC</option>
+                            <option value="approvedFirst">Approved First</option>
+                            <option value="notApprovedFirst">Not Approved First</option>
                         </select>
                     </div>
                     {this.state.projects.map((project) => (

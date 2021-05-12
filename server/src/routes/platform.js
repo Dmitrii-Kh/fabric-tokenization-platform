@@ -151,13 +151,13 @@ export const signInToPlatform = async (certificate, privateKey) => {
 // *************************************************
 
 const createNewProject = async (req, res) => {
-    const {certificate, privateKey, projectName, projectDescription, emission, tokenName, priceInUSDT} = req.body;
+    const {certificate, privateKey, projectName, projectDescription, totalSupply, tokenName, priceInUSDT} = req.body;
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'createNewProject',
-            props: [projectName, projectDescription, emission, tokenName, priceInUSDT]
+            props: [projectName, projectDescription, totalSupply, tokenName, priceInUSDT]
         })
         gateway.disconnect()
         res.status(201).json(result)
