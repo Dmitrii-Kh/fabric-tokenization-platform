@@ -2,6 +2,8 @@
 function Header(){
     if(sessionStorage.getItem('affiliation') === 'validator') {
         return <h3>Balance</h3>
+    } else if (sessionStorage.getItem('affiliation') === 'company' && window.location.href.indexOf('/companies/') > -1) {
+        return <h3><b>{sessionStorage.getItem('commonName')}</b> total investments: </h3>
     } else {
         return <h3>Portfolio</h3>
     }
@@ -31,20 +33,20 @@ class Portfolio extends React.Component {
                 url = `/api/v1/platform/getValidatorWallet`
                 break;
             case 'company':
-                url = `/api/v1/platform/getProjectWallet`
-                // body['projectName'] = window.location.href.split('/')[5];
-                body['projectName'] = this.props.projectName;
+                if(window.location.href.indexOf('/companies/') > -1) {
+                    url = `/api/v1/platform/getCompanyTotalInvestments`
+                } else {
+                    url = `/api/v1/platform/getProjectWallet`
+                    body['projectName'] = this.props.projectName;
+                }
                 break;
             case 'systemAdmin':
                 if (window.location.href.indexOf('/projects/') > -1) {
                     url = `/api/v1/platform/getProjectWallet`
-                    // body['companyName'] = window.location.href.split('/')[4];
-                    // body['projectName'] = window.location.href.split('/')[5];
                     body['companyName'] = this.props.companyName;
                     body['projectName'] = this.props.projectName;
                 } else if (window.location.href.indexOf('/admin/investors/') > -1) {
                     url = `/api/v1/platform/getInvestorWallet`
-                    // body['investorFullName'] = window.location.href.split('/')[5];
                     body['investorFullName'] = this.props.investorFullName;
                 }
                 break;
@@ -91,7 +93,8 @@ class Portfolio extends React.Component {
                 )
             }
             return (
-                        <div><Header/>
+                        <div className="portfolio">
+                            <Header/>
                             <table className="table table-hover wallet-table">
                                 <tbody>
                                 <tr>
@@ -105,7 +108,8 @@ class Portfolio extends React.Component {
                                     </tr>
                                 ))}
                                 </tbody>
-                            </table></div>
+                            </table>
+                        </div>
 
 
             );

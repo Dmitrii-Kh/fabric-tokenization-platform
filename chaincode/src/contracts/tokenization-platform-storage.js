@@ -113,7 +113,7 @@ class TokenizationPlatformStorage extends Contract {
     }
 
 
-    async createNewProject(ctx, projectName, projectDescription, emission, tokenName, priceInUSDT) {
+    async createNewProject(ctx, projectName, projectDescription, totalSupply, tokenName, priceInUSDT) {
         const identity = new ClientIdentity(ctx.stub);
         if (identity.cert.subject.organizationalUnitName !== 'company') {
             throw new Error('Current subject does not have access to this function');
@@ -127,10 +127,11 @@ class TokenizationPlatformStorage extends Contract {
             {
                 projectName: projectName,
                 projectDescription: projectDescription,
-                emission: emission,
+                totalSupply: totalSupply,
+                supply: 0,
                 tokenName: tokenName,
                 priceInUSDT: priceInUSDT,
-                approved: false,
+                approved: "false",
                 wallet: [
                     {
                         currencyName: "USDT",
@@ -457,7 +458,7 @@ class TokenizationPlatformStorage extends Contract {
                                 return JSON.stringify({message: "Project does not possess enough USDT"}, null, 2);
                             } else {
                                 record.amount = Number(record.amount) - Number(VALIDATOR_FEE);
-                                proj.approved = true;
+                                proj.approved = "true";
                                 approved = "true";
                             }
                             inArr = true;
@@ -651,6 +652,28 @@ class TokenizationPlatformStorage extends Contract {
         await ctx.stub.putState("companies", Buffer.from(JSON.stringify(companiesAsObject)));
 
         return JSON.stringify({data: ctx.stub.getTxID()}, null, 2);
+    }
+
+    async companyTotalInvestments(ctx) {
+        const identity = new ClientIdentity(ctx.stub);
+        if (identity.cert.subject.organizationalUnitName !== 'company') {
+            throw new Error('Current subject does not have access to this function');
+        }
+
+        const companiesAsBytes = await ctx.stub.getState("companies");
+        const companiesAsObject = JSON.parse(companiesAsBytes.toString());
+
+        let result = 0;
+        companiesAsObject[identity.cert.subject.commonName].projects.forEach(pr => {
+            pr.wallet.forEach(rec => {
+                if(rec.currencyName === "USDT") {
+                    result += Number(rec.amount);
+                }
+            })
+        })
+
+
+        return JSON.stringify([{currencyName: 'USDT', amount: result}], null, 2);
     }
 
 

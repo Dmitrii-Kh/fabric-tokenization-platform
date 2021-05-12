@@ -64,9 +64,10 @@ function CompanyName(props) {
 function ApprovalInfo(props) {
    if(sessionStorage.getItem('affiliation') !== 'investor') {
        return (
-           <div className="approval-info">Emission approved: <b>{props.approved.toString()}</b></div>
+           <div className="approval-info">Project approved: <b>{props.approved.toString()}</b></div>
        )
    }
+   return <span></span>
 }
 
 const Project = (props) => {
