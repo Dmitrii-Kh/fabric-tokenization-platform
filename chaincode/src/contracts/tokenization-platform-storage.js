@@ -460,6 +460,7 @@ class TokenizationPlatformStorage extends Contract {
                                 record.amount = Number(record.amount) - Number(VALIDATOR_FEE);
                                 proj.approved = "true";
                                 approved = "true";
+                                proj["approvedBy"] = identity.cert.subject.commonName;
                             }
                             inArr = true;
                         }
