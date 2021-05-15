@@ -378,39 +378,72 @@ const investToProject = async (req, res) => {
         //res.status(201).json(result)
 
 
-        const { createCanvas } = require('canvas');
+        const { createCanvas, loadImage  } = require('canvas');
 
-        const width = 1200
-        const height = 630
+        const width = 1600
+        const height = 1081
 
         const canvas = createCanvas(width, height)
         const context = canvas.getContext('2d')
 
-        context.fillStyle = '#000'
+        context.fillStyle = '#ffffff'
         context.fillRect(0, 0, width, height)
 
-        context.font = 'bold 15pt Menlo'
-        context.textAlign = 'center'
-        context.textBaseline = 'top'
-        //context.fillStyle = '#3574d4'
-        context.fillStyle = '#fff'
+        // const image = await loadImage('./CertTemplate.jpeg');
 
-        const text = "This certificate approves that";
-        const text2 = `${result.investorFullName} successfully invested ${amount}${currency} in ${result.companyName}, ${projectName}`;
-        const text3 = `Transaction ID: ${result.transactionId}`;
+        loadImage('./src/public/images/Green-money-1600px.jpg').then(image => {
+            context.drawImage(image, 0,0);
+            context.fillStyle = "rgba(0, 0, 0, 0.4)";
+            context.fillRect(0, 0, 1600, 1081);
 
-        context.fillText(text, 600, 170)
-        context.fillText(text2, 600, 200)
-        context.fillText(text3, 600, 260)
+            context.font = 'bold 22pt Menlo'
+            context.textAlign = 'center'
+            context.textBaseline = 'top'
+            context.fillStyle = '#ffffff'
+
+            const text = "This certificate approves that";
+            const text2 = `${result.investorFullName} successfully invested ${amount} ${currency} in ${result.companyName}, ${projectName}`;
+            const text3 = `Transaction ID: ${result.transactionId}`;
+
+            context.fillText(text, 800, 170)
+            context.fillText(text2, 800, 250)
+            context.fillText(text3, 800, 330)
 
 
-        context.font = 'bold 20pt Menlo'
-        context.fillText('{tokenizationPlatformName}', 600, 530)
-        const buffer = canvas.toBuffer('image/jpeg')
+            context.font = 'bold 30pt Menlo'
+            context.fillText('{Get Tokenized}', 800, 730)
+            const buffer = canvas.toBuffer('image/jpeg')
 
-        fs.writeFileSync('./investCert.jpeg', buffer)
+            fs.writeFileSync('./investCert.jpeg', buffer)
 
-        res.download("./investCert.jpeg");
+            res.download("./investCert.jpeg");
+        })
+
+        // context.drawImage(image, 0,0);
+        // context.fillStyle = "rgba(0, 0, 0, 0.4)";
+        // context.fillRect(0, 0, 1024, 683);
+        //
+        // context.font = 'bold 15pt Menlo'
+        // context.textAlign = 'center'
+        // context.textBaseline = 'top'
+        // context.fillStyle = '#ffffff'
+        //
+        // const text = "This certificate approves that";
+        // const text2 = `${result.investorFullName} successfully invested ${amount}${currency} in ${result.companyName}, ${projectName}`;
+        // const text3 = `Transaction ID: ${result.transactionId}`;
+        //
+        // context.fillText(text, 600, 170)
+        // context.fillText(text2, 600, 200)
+        // context.fillText(text3, 600, 260)
+        //
+        //
+        // context.font = 'bold 20pt Menlo'
+        // context.fillText('{tokenizationPlatformName}', 600, 530)
+        // const buffer = canvas.toBuffer('image/jpeg')
+        //
+        // fs.writeFileSync('./investCert.jpeg', buffer)
+        //
+        // res.download("./investCert.jpeg");
 
     } catch (e) {
         res.status(400).json({message: e.message});
