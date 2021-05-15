@@ -16,7 +16,7 @@ class ApprovedProjects extends React.Component {
     loadPosts() {
         let body = {certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')};
         if(sessionStorage.getItem('affiliation') === 'systemAdmin') {
-            body["validatorFullName"] = this.props.validatorFullName;
+            body["validatorUID"] = this.props.validatorUID;
         }
         fetch("/api/v1/platform/getValidatorApprovals", {
             method: 'POST',
@@ -55,7 +55,7 @@ class ApprovedProjects extends React.Component {
 
                 return (
                     <div className="approved-projects-container">
-                        <h3>Approved projects by {this.props.validatorFullName || window.location.href.split('/')[5]}: </h3>
+                        <h3>Approved projects by {this.props.validatorUID || window.location.href.split('/')[4]}: </h3>
                         {this.state.projects.map((project) => (
                             <div className="approved-project">
                                 <div className="approved-project-details">

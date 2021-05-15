@@ -23,7 +23,7 @@ const adminRegistration = async (req, res) => {
 };
 
 const registration = async (req, res, affiliation) => {
-  const { login, password } = req.body;
+  const { login, fullName, password } = req.body;
   try {
     const ca = getCA();
     const adminData = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'password' });
@@ -38,17 +38,17 @@ const registration = async (req, res, affiliation) => {
 
     //createEntity call
     if(affiliation === "investor") {
-      const res = await createInvestor(gateway, login);
+      const res = await createInvestor(gateway, login, fullName);
       console.log("Investor created: " + res);
     }
 
     if(affiliation === "validator") {
-      const res = await createValidator(gateway, login);
+      const res = await createValidator(gateway, login, fullName);
       console.log("Validator created: " + res);
     }
 
     if(affiliation === "company") {
-      const res = await createCompany(gateway, login);
+      const res = await createCompany(gateway, login, fullName);
       console.log("Company created: " + res);
     }
 
@@ -80,6 +80,7 @@ const signIn = async (req, res) => {
     console.log("Sign In Success");
     res.status(201).json({
       commonName: userData.commonName,
+      fullName: userData.fullName,
       affiliation: userData.affiliation,
       certificate: certificate,
       privateKey: privateKey,

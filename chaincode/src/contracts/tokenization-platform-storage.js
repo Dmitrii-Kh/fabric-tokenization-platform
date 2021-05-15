@@ -55,15 +55,16 @@ class TokenizationPlatformStorage extends Contract {
     }
 
 
-    async createInvestor(ctx, investorFullName) {
+    async createInvestor(ctx, investorUID, investorFullName) {
         const investorsAsBytes = await ctx.stub.getState("investors");
 
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
-        if (!!investorsAsObject[investorFullName] && investorsAsObject[investorFullName].toString().length !== 0) {
+        if (!!investorsAsObject[investorUID] && investorsAsObject[investorUID].toString().length !== 0) {
             throw new Error('Investor with the current name already exist');
         }
 
-        investorsAsObject[investorFullName] = {
+        investorsAsObject[investorUID] = {
+            investorFullName: investorFullName,
             wallet: []
         }
         const newRecordInBytes = Buffer.from(JSON.stringify(investorsAsObject));
@@ -71,15 +72,16 @@ class TokenizationPlatformStorage extends Contract {
         return JSON.stringify(investorsAsObject, null, 2);
     }
 
-    async createValidator(ctx, validatorFullName) {
+    async createValidator(ctx, validatorUID, validatorFullName) {
         const validatorsAsBytes = await ctx.stub.getState("validators");
 
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
-        if (!!validatorsAsObject[validatorFullName] && validatorsAsObject[validatorFullName].toString().length !== 0) {
+        if (!!validatorsAsObject[validatorUID] && validatorsAsObject[validatorUID].toString().length !== 0) {
             throw new Error('Validator with the current name already exist');
         }
 
-        validatorsAsObject[validatorFullName] = {
+        validatorsAsObject[validatorUID] = {
+            validatorFullName: validatorFullName,
             wallet: []
         }
         const newRecordInBytes = Buffer.from(JSON.stringify(validatorsAsObject));
@@ -87,15 +89,16 @@ class TokenizationPlatformStorage extends Contract {
         return JSON.stringify(validatorsAsObject, null, 2);
     }
 
-    async createCompany(ctx, companyName) {
+    async createCompany(ctx, companyUID, companyName) {
         const companiesAsBytes = await ctx.stub.getState("companies");
 
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
-        if (!!companiesAsObject[companyName] && companiesAsObject[companyName].toString().length !== 0) {
+        if (!!companiesAsObject[companyUID] && companiesAsObject[companyUID].toString().length !== 0) {
             throw new Error('Company with the current name already exist');
         }
 
-        companiesAsObject[companyName] = {
+        companiesAsObject[companyUID] = {
+            companyName: companyName,
             projects: []
         }
         const newRecordInBytes = Buffer.from(JSON.stringify(companiesAsObject));
@@ -105,10 +108,37 @@ class TokenizationPlatformStorage extends Contract {
 
     async signInToPlatform(ctx) {
         const identity = new ClientIdentity(ctx.stub);
+
+        let COLL_NAME = undefined;
+        let field = undefined;
+        switch (identity.cert.subject.organizationalUnitName) {
+            case "investor":
+                COLL_NAME = "investors";
+                field = "investorFullName";
+                break;
+            case "validator":
+                COLL_NAME = "validators";
+                field = "validatorFullName";
+                break;
+            case "company":
+                COLL_NAME = "companies";
+                field = "companyName";
+                break;
+            default:
+                break;
+        }
+
+        let fullName = "";
+        if(!!COLL_NAME) {
+            const collectionAsBytes = await ctx.stub.getState(COLL_NAME);
+            const collectionAsObject = JSON.parse(collectionAsBytes.toString());
+            fullName = collectionAsObject[identity.cert.subject.commonName][field];
+        }
         const userData = {
             commonName: identity.cert.subject.commonName,
+            fullName: fullName,
             affiliation: identity.cert.subject.organizationalUnitName
-        }
+          }
         return JSON.stringify(userData, null, 2);
     }
 
@@ -152,35 +182,35 @@ class TokenizationPlatformStorage extends Contract {
         const companiesAsBytes = await ctx.stub.getState("companies");
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
 
+        let result = []
+
         if (identity.cert.subject.organizationalUnitName === 'company') {
-            let result = [];
             companiesAsObject[identity.cert.subject.commonName].projects.forEach(project => {
-                result.push({ companyName: identity.cert.subject.commonName, ...project })
+                result.push({
+                    companyUID: identity.cert.subject.commonName,
+                    companyName: companiesAsObject[identity.cert.subject.commonName].companyName, ...project
+                })
             })
-            return JSON.stringify(result, null, 2);
         }
 
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
-            let result = []
             //todo check if no companies
             Object.entries(companiesAsObject).forEach(([key, value]) => {
                     if (value.projects.length === 0) return;
                     value.projects.forEach(project => {
                         result.push(
                             {
-                                companyName: key,
+                                companyUID: key,
+                                companyName: value.companyName,
                                 ...project
                             }
                         )
                     })
                 }
             );
-
-            return JSON.stringify(result, null, 2);
         }
 
         if (identity.cert.subject.organizationalUnitName === 'investor') {
-            let result = []
             //todo check if no companies
             Object.entries(companiesAsObject).forEach(([key, value]) => {
                     if (value.projects.length === 0) return;
@@ -188,8 +218,9 @@ class TokenizationPlatformStorage extends Contract {
                         if (project.approved === true || project.approved === "true") {
                             result.push(
                                 {
-                                    companyName: key,
-                                   ...project
+                                    companyUID: key,
+                                    companyName: value.companyName,
+                                    ...project
                                 }
                             )
                         }
@@ -197,12 +228,9 @@ class TokenizationPlatformStorage extends Contract {
                     })
                 }
             );
-
-            return JSON.stringify(result, null, 2);
         }
 
         if (identity.cert.subject.organizationalUnitName === 'validator') {
-            let result = []
             //todo check if no companies
             Object.entries(companiesAsObject).forEach(([key, value]) => {
                     if (value.projects.length === 0) return;
@@ -210,13 +238,9 @@ class TokenizationPlatformStorage extends Contract {
                         if (project.approved === "false" || project.approved === false) {
                             result.push(
                                 {
-                                    companyName: key,
-                                    projectName: project.projectName,
-                                    projectDescription: project.projectDescription,
-                                    emission: project.emission,
-                                    tokenName: project.tokenName,
-                                    priceInUSDT: project.priceInUSDT,
-                                    approved: project.approved
+                                    companyUID: key,
+                                    companyName: value.companyName,
+                                    ...project
                                 }
                             )
                         }
@@ -224,13 +248,13 @@ class TokenizationPlatformStorage extends Contract {
                     })
                 }
             );
-
-            return JSON.stringify(result, null, 2);
         }
+
+        return JSON.stringify(result, null, 2);
     }
 
 
-    async depositInvestor(ctx, investorFullName, currency, amount) {
+    async depositInvestor(ctx, investorUID, currency, amount) {
         const identity = new ClientIdentity(ctx.stub);
         if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
             throw new Error('Current subject does not have access to this function');
@@ -239,7 +263,7 @@ class TokenizationPlatformStorage extends Contract {
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
         //todo check whether investor exists
 
-        let wallet = investorsAsObject[investorFullName].wallet;
+        let wallet = investorsAsObject[investorUID].wallet;
         if (wallet.length === 0) {
             wallet.push({
                 currencyName: currency,
@@ -253,7 +277,7 @@ class TokenizationPlatformStorage extends Contract {
                     inArr = true;
                 }
             })
-            if(!inArr){
+            if (!inArr) {
                 wallet.push({
                     currencyName: currency,
                     amount: Number(amount)
@@ -262,11 +286,11 @@ class TokenizationPlatformStorage extends Contract {
         }
         const newRecordInBytes = Buffer.from(JSON.stringify(investorsAsObject));
         await ctx.stub.putState("investors", newRecordInBytes);
-        return JSON.stringify(investorsAsObject[investorFullName], null, 2);
+        return JSON.stringify(investorsAsObject[investorUID], null, 2);
     }
 
     //todo deposit validator
-    async depositValidator(ctx, validatorFullName, currency, amount) {
+    async depositValidator(ctx, validatorUID, currency, amount) {
         const identity = new ClientIdentity(ctx.stub);
         // if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
         //     throw new Error('Current subject does not have access to this function');
@@ -275,7 +299,7 @@ class TokenizationPlatformStorage extends Contract {
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
         //todo check whether investor exists
 
-        let wallet = validatorsAsObject[validatorFullName].wallet;
+        let wallet = validatorsAsObject[validatorUID].wallet;
         if (wallet.length === 0) {
             wallet.push({
                 currencyName: currency,
@@ -289,7 +313,7 @@ class TokenizationPlatformStorage extends Contract {
                     inArr = true;
                 }
             })
-            if(!inArr){
+            if (!inArr) {
                 wallet.push({
                     currencyName: currency,
                     amount: Number(amount)
@@ -298,10 +322,10 @@ class TokenizationPlatformStorage extends Contract {
         }
         const newRecordInBytes = Buffer.from(JSON.stringify(validatorsAsObject));
         await ctx.stub.putState("validators", newRecordInBytes);
-        return JSON.stringify(validatorsAsObject[validatorFullName], null, 2);
+        return JSON.stringify(validatorsAsObject[validatorUID], null, 2);
     }
 
-    async depositCompanyProject(ctx, companyName, projectName, currency, amount){
+    async depositCompanyProject(ctx, companyUID, projectName, currency, amount) {
         const identity = new ClientIdentity(ctx.stub);
         if (identity.cert.subject.organizationalUnitName !== 'company') {
             throw new Error('Current subject does not have access to this function');
@@ -310,9 +334,9 @@ class TokenizationPlatformStorage extends Contract {
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
 
 
-        companiesAsObject[companyName].projects.forEach(proj => {
-            if(proj.projectName === projectName){
-                if(proj.wallet.length === 0) {
+        companiesAsObject[companyUID].projects.forEach(proj => {
+            if (proj.projectName === projectName) {
+                if (proj.wallet.length === 0) {
                     proj.wallet.push({
                         currencyName: currency,
                         amount: Number(amount)
@@ -325,7 +349,7 @@ class TokenizationPlatformStorage extends Contract {
                             inArr = true;
                         }
                     })
-                    if(!inArr){
+                    if (!inArr) {
                         proj.wallet.push({
                             currencyName: currency,
                             amount: Number(amount)
@@ -337,59 +361,59 @@ class TokenizationPlatformStorage extends Contract {
 
         const newRecordInBytes = Buffer.from(JSON.stringify(companiesAsObject));
         await ctx.stub.putState("companies", newRecordInBytes);
-        return JSON.stringify(companiesAsObject[companyName], null, 2);
+        return JSON.stringify(companiesAsObject[companyUID], null, 2);
     }
 
-    async getInvestorWallet(ctx, investorFullName) {
-        investorFullName = investorFullName || "";
+    async getInvestorWallet(ctx, investorUID) {
+        investorUID = investorUID || "";
         const identity = new ClientIdentity(ctx.stub);
         const investorsAsBytes = await ctx.stub.getState("investors");
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
-            return JSON.stringify(investorsAsObject[investorFullName].wallet, null, 2);
+            return JSON.stringify(investorsAsObject[investorUID].wallet, null, 2);
         }
-        if(identity.cert.subject.organizationalUnitName === 'investor') {
+        if (identity.cert.subject.organizationalUnitName === 'investor') {
             return JSON.stringify(investorsAsObject[identity.cert.subject.commonName].wallet, null, 2);
         }
     }
 
 
-    async getValidatorWallet(ctx, validatorFullName) {
-        validatorFullName = validatorFullName || "";
+    async getValidatorWallet(ctx, validatorUID) {
+        validatorUID = validatorUID || "";
         const identity = new ClientIdentity(ctx.stub);
         const validatorsAsBytes = await ctx.stub.getState("validators");
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
-            return JSON.stringify(validatorsAsObject[validatorFullName].wallet, null, 2);
+            return JSON.stringify(validatorsAsObject[validatorUID].wallet, null, 2);
         }
-        if(identity.cert.subject.organizationalUnitName === 'validator') {
+        if (identity.cert.subject.organizationalUnitName === 'validator') {
             return JSON.stringify(validatorsAsObject[identity.cert.subject.commonName].wallet, null, 2);
         }
     }
 
-    async getValidatorApprovals(ctx, validatorFullName) {
-        validatorFullName = validatorFullName || "";
+    async getValidatorApprovals(ctx, validatorUID) {
+        validatorUID = validatorUID || "";
         const identity = new ClientIdentity(ctx.stub);
         const validatorsAsBytes = await ctx.stub.getState("validators");
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
-            return JSON.stringify(validatorsAsObject[validatorFullName].approvedProjects, null, 2);
+            return JSON.stringify(validatorsAsObject[validatorUID].approvedProjects, null, 2);
         }
-        if(identity.cert.subject.organizationalUnitName === 'validator') {
+        if (identity.cert.subject.organizationalUnitName === 'validator') {
             return JSON.stringify(validatorsAsObject[identity.cert.subject.commonName].approvedProjects, null, 2);
         }
     }
 
-    async getProjectWallet(ctx, projectName, companyName) {
-        companyName = companyName || "";
+    async getProjectWallet(ctx, projectName, companyUID) {
+        companyUID = companyUID || "";
         const identity = new ClientIdentity(ctx.stub);
         const companiesAsBytes = await ctx.stub.getState("companies");
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
         let result = [];
         //todo into one function
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
-            companiesAsObject[companyName].projects.forEach(proj => {
-                if(proj.projectName === projectName) {
+            companiesAsObject[companyUID].projects.forEach(proj => {
+                if (proj.projectName === projectName) {
                     proj.wallet.forEach(record => {
                         result.push(record);
                     })
@@ -397,9 +421,9 @@ class TokenizationPlatformStorage extends Contract {
             })
             return JSON.stringify(result, null, 2);
         }
-        if(identity.cert.subject.organizationalUnitName === 'company') {
+        if (identity.cert.subject.organizationalUnitName === 'company') {
             companiesAsObject[identity.cert.subject.commonName].projects.forEach(proj => {
-                if(proj.projectName === projectName) {
+                if (proj.projectName === projectName) {
                     proj.wallet.forEach(record => {
                         result.push(record);
                     })
@@ -412,8 +436,8 @@ class TokenizationPlatformStorage extends Contract {
     }
 
 
-    async getProject(ctx, projectName, companyName) {
-        companyName = companyName || "";
+    async getProject(ctx, projectName, companyUID) {
+        companyUID = companyUID || "";
         const identity = new ClientIdentity(ctx.stub);
         const companiesAsBytes = await ctx.stub.getState("companies");
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
@@ -421,14 +445,17 @@ class TokenizationPlatformStorage extends Contract {
         if (identity.cert.subject.organizationalUnitName === 'company') {
             companiesAsObject[identity.cert.subject.commonName].projects.forEach(proj => {
                 if (proj.projectName === projectName) {
-                    result = {companyName: identity.cert.subject.commonName, ...proj};
+                    result = {
+                        companyUID: identity.cert.subject.commonName,
+                        companyName: companiesAsObject[identity.cert.subject.commonName].companyName, ...proj
+                    };
                 }
             })
             return JSON.stringify(result, null, 2);
         }
-        companiesAsObject[companyName].projects.forEach(proj => {
+        companiesAsObject[companyUID].projects.forEach(proj => {
             if (proj.projectName === projectName) {
-                result = {companyName: companyName, ...proj};
+                result = {companyUID: companyUID, companyName: companiesAsObject[companyUID].companyName, ...proj};
             }
         })
         return JSON.stringify(result, null, 2);
@@ -436,7 +463,7 @@ class TokenizationPlatformStorage extends Contract {
     }
 
     //todo check returns for valid response
-    async approveProject(ctx, projectName, companyName) {
+    async approveProject(ctx, projectName, companyUID) {
         const identity = new ClientIdentity(ctx.stub);
         if (identity.cert.subject.organizationalUnitName !== 'validator') {
             throw new Error('Current subject does not have access to this function');
@@ -445,35 +472,36 @@ class TokenizationPlatformStorage extends Contract {
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
 
         let approved = false;
-        companiesAsObject[companyName].projects.forEach(proj => {
-            if(proj.projectName === projectName){
-                if(proj.wallet.length === 0) {
+        companiesAsObject[companyUID].projects.forEach(proj => {
+            if (proj.projectName === projectName) {
+                if (proj.wallet.length === 0) {
                     return JSON.stringify({message: "Project's portfolio is empty"});
                 } else {
                     let inArr = false;
                     proj.wallet.forEach((record) => {
                         if (record.currencyName === VALIDATOR_FEE_CURRENCY) {
-                            if(Number(record.amount) - Number(VALIDATOR_FEE) < 0) {
+                            if (Number(record.amount) - Number(VALIDATOR_FEE) < 0) {
                                 throw new Error("Project does not possess enough USDT");
                                 return JSON.stringify({message: "Project does not possess enough USDT"}, null, 2);
                             } else {
                                 record.amount = Number(record.amount) - Number(VALIDATOR_FEE);
                                 proj.approved = "true";
                                 approved = "true";
+                                proj["approvedBy"] = identity.cert.subject.commonName;
                             }
                             inArr = true;
                         }
                     })
-                    if(!inArr){
+                    if (!inArr) {
                         return JSON.stringify({message: "Project does not possess USDT"});
                     }
                 }
             }
         })
 
-        if(approved) {
+        if (approved) {
             try {
-               await this.addApprovedProject(ctx, companyName, projectName, ctx.stub.getTxID());
+                await this.addApprovedProject(ctx, companyUID, companiesAsObject[companyUID].companyName, projectName, ctx.stub.getTxID());
             } catch (e) {
                 throw new Error("Error during adding project to validator's list!");
             }
@@ -485,15 +513,16 @@ class TokenizationPlatformStorage extends Contract {
 
     }
 
-    async addApprovedProject(ctx, companyName, projectName, txId) {
+    async addApprovedProject(ctx, companyUID, companyName, projectName, txId) {
         const identity = new ClientIdentity(ctx.stub);
         const validatorsAsBytes = await ctx.stub.getState("validators");
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
         const validator = validatorsAsObject[identity.cert.subject.commonName];
-        if(!validator.approvedProjects) {
+        if (!validator.approvedProjects) {
             validator.approvedProjects = [];
         }
         validator.approvedProjects.push({
+            companyUID: companyUID,
             companyName: companyName,
             projectName: projectName,
             approvalDate: Date.now(),
@@ -514,7 +543,7 @@ class TokenizationPlatformStorage extends Contract {
                     inArr = true;
                 }
             })
-            if(!inArr){
+            if (!inArr) {
                 wallet.push({
                     currencyName: VALIDATOR_FEE_CURRENCY,
                     amount: Number(VALIDATOR_FEE)
@@ -542,32 +571,39 @@ class TokenizationPlatformStorage extends Contract {
         if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
             throw new Error('Current subject does not have access to this function');
         }
+
         const validatorsAsBytes = await ctx.stub.getState("validators");
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
+
+        let result = []
+
 
         return JSON.stringify(Object.keys(validatorsAsObject), null, 2);
     }
 
 
-    async investToProject(ctx, investorFullName, companyName, projectName, currency, amount) {
+    async investToProject(ctx, companyUID, projectName, currency, amount) {
         const identity = new ClientIdentity(ctx.stub);
-        if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
+        if (identity.cert.subject.organizationalUnitName !== 'investor') {
             throw new Error('Current subject does not have access to this function');
         }
+        const investorUID = identity.cert.subject.commonName;
+
         const investorsAsBytes = await ctx.stub.getState("investors");
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
-        const investorWallet = investorsAsObject[investorFullName].wallet;
+        const investorFullName = investorsAsObject[investorUID].investorFullName;
+        const investorWallet = investorsAsObject[investorUID].wallet;
 
 
         //withdraw investor's money
-        if(investorWallet.length === 0) {
+        if (investorWallet.length === 0) {
             //todo send response
             throw new Error("Current investor's portfolio is empty");
-        }else {
+        } else {
             let inArr = false;
             investorWallet.forEach((record) => {
                 if (record.currencyName === currency) {
-                    if(Number(record.amount) - Number(amount) < 0) {
+                    if (Number(record.amount) - Number(amount) < 0) {
                         throw new Error(`Current investor does not possess enough ${currency}`);
                     } else {
                         record.amount = Number(record.amount) - Number(amount);
@@ -575,13 +611,13 @@ class TokenizationPlatformStorage extends Contract {
                     inArr = true;
                 }
             })
-            if(!inArr){
+            if (!inArr) {
                 throw new Error("Current investor does not possess this token");
             }
         }
 
 
-        const projToInvestAsString = await this.getProject(ctx, projectName, companyName);
+        const projToInvestAsString = await this.getProject(ctx, projectName, companyUID);
         const projToInvest = JSON.parse(projToInvestAsString);
 
         const projectTokenAmount = Number(amount) / Number(projToInvest.priceInUSDT);
@@ -592,19 +628,18 @@ class TokenizationPlatformStorage extends Contract {
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
 
 
-        companiesAsObject[companyName].projects.forEach(proj => {
-            if(proj.projectName === projectName){
-                if(!proj["supply"]) {
+        companiesAsObject[companyUID].projects.forEach(proj => {
+            if (proj.projectName === projectName) {
+                if (!proj["supply"]) {
                     proj["supply"] = 0;
                 }
-                if(Number(proj.emission) - (Number(proj.supply) + Number(projectTokenAmount)) < 0) {
+                if (Number(proj.totalSupply) - (Number(proj.supply) + Number(projectTokenAmount)) < 0) {
                     throw new Error("Impossible to withdraw project token, not enough!");
                 } else {
-                  proj.supply = Number(proj.supply)+ Number(projectTokenAmount);
+                    proj.supply = Number(proj.supply) + Number(projectTokenAmount);
                 }
             }
         })
-
 
 
         // deposit investor
@@ -615,7 +650,7 @@ class TokenizationPlatformStorage extends Contract {
                 inArr = true;
             }
         })
-        if(!inArr){
+        if (!inArr) {
             investorWallet.push({
                 currencyName: projToInvest.tokenName,
                 amount: Number(projectTokenAmount)
@@ -623,9 +658,9 @@ class TokenizationPlatformStorage extends Contract {
         }
 
         // deposit project
-        companiesAsObject[companyName].projects.forEach(proj => {
-            if(proj.projectName === projectName){
-                if(proj.wallet.length === 0) {
+        companiesAsObject[companyUID].projects.forEach(proj => {
+            if (proj.projectName === projectName) {
+                if (proj.wallet.length === 0) {
                     proj.wallet.push({
                         currencyName: currency,
                         amount: Number(amount)
@@ -638,7 +673,7 @@ class TokenizationPlatformStorage extends Contract {
                             inArr = true;
                         }
                     })
-                    if(!inArr){
+                    if (!inArr) {
                         proj.wallet.push({
                             currencyName: currency,
                             amount: Number(amount)
@@ -648,10 +683,25 @@ class TokenizationPlatformStorage extends Contract {
             }
         })
 
+        companiesAsObject[companyUID].projects.forEach(proj => {
+            if (proj.projectName === projectName) {
+                if (!proj["investmentHistory"]) {
+                    proj["investmentHistory"] = [];
+                }
+                proj["investmentHistory"].push({
+                    transactionId: ctx.stub.getTxID(),
+                    investorFullName: investorFullName,
+                    timestamp: Date.now(),
+                    currency: currency,
+                    amount: amount
+                })
+            }
+        });
+
         await ctx.stub.putState("investors", Buffer.from(JSON.stringify(investorsAsObject)));
         await ctx.stub.putState("companies", Buffer.from(JSON.stringify(companiesAsObject)));
 
-        return JSON.stringify({data: ctx.stub.getTxID()}, null, 2);
+        return JSON.stringify({investorFullName: investorFullName, companyName: companiesAsObject[companyUID].companyName, transactionId: ctx.stub.getTxID()}, null, 2);
     }
 
     async companyTotalInvestments(ctx) {
@@ -666,7 +716,7 @@ class TokenizationPlatformStorage extends Contract {
         let result = 0;
         companiesAsObject[identity.cert.subject.commonName].projects.forEach(pr => {
             pr.wallet.forEach(rec => {
-                if(rec.currencyName === "USDT") {
+                if (rec.currencyName === "USDT") {
                     result += Number(rec.amount);
                 }
             })

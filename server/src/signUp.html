@@ -7,11 +7,13 @@
     <title>Sign Up</title>
     <link rel="stylesheet" type="text/css" href="stylesheets/styles.css">
 </head>
-<body>
+<body class="login-register-page">
 
 <div class="flex-container">
+    <h1 class="get-tokenized">{Get Tokenized}</h1>
     <form class="register-form">
         <input type="text" id="login" name="login" placeholder="Login" required><br>
+        <input type="text" id="fullName" name="fullName" placeholder="Name" required><br>
         <input type="text" id="pass" name="password" placeholder="Password" required><br><br>
         <input type="radio" name="entity" id="investor" value="investor" checked>
         <label for="investor">Investor</label>
@@ -44,6 +46,7 @@
 
         const login = form.login.value;
         const password = form.password.value;
+        const fullName = form.fullName.value;
         const entity = form.entity.value;
 
         const emptyOrWhitespaceRegex = new RegExp("^$|\\s+");
@@ -55,7 +58,7 @@
                 const response = await fetch(`/api/v1/auth/${entity}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({login, password})
+                    body: JSON.stringify({login, fullName, password})
                 });
 
                 const responseObj = await response.json();

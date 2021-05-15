@@ -67,7 +67,7 @@ class Projects extends React.Component {
         this.sortKey = {
             companyName: 'companyName',
             projectName: 'projectName',
-            totalSupply: 'emission',
+            totalSupply: 'totalSupply',
             supply: 'supply',
             priceInUSDT: 'priceInUSDT',
             approved: 'approved'
@@ -158,7 +158,12 @@ class Projects extends React.Component {
     render() {
         if (this.state.projects) {
             if (this.state.projects.length === 0) {
-                return <div className="no-projects-alert">No projects yet!</div>
+                return (
+                    <div>
+                        <AddProjectMenu/>
+                        <div className="no-projects-alert">No projects yet!</div>
+                    </div>
+                )
             }
 
             return (
@@ -188,14 +193,16 @@ class Projects extends React.Component {
                     </div>
                     {this.state.projects.map((project) => (
                         <Project
+                            companyUID = { project.companyUID }
                             companyName = { project.companyName }
                             projectName = { project.projectName }
                             projectDescription = { project.projectDescription }
-                            emission = { project.emission }
+                            totalSupply = { project.totalSupply }
                             supply = { project.supply }
                             tokenName = { project.tokenName }
                             priceInUSDT = { project.priceInUSDT }
                             approved = { project.approved }
+                            approvedBy = { project.approvedBy }
                         />
                     ))}
                 </div>

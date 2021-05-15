@@ -7,9 +7,10 @@
     <title>Sign In</title>
     <link rel="stylesheet" type="text/css" href="stylesheets/styles.css">
 </head>
-<body>
+<body class="login-register-page">
 
 <div class="flex-container">
+    <h1 class="get-tokenized">{Get Tokenized}</h1>
     <form class="register-form">
         <label class="sign-in-label" for="cert">Certificate
             <input type="file" id="cert" name="cert" placeholder="Certificate">
@@ -69,6 +70,7 @@
                 sessionStorage.setItem("cert", responseObj.certificate);
                 sessionStorage.setItem("prKey", responseObj.privateKey);
                 sessionStorage.setItem("commonName", responseObj.commonName);
+                sessionStorage.setItem("fullName", responseObj.fullName);
                 sessionStorage.setItem("affiliation", responseObj.affiliation);
 
 
