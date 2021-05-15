@@ -43,11 +43,11 @@ class Portfolio extends React.Component {
             case 'systemAdmin':
                 if (window.location.href.indexOf('/projects/') > -1) {
                     url = `/api/v1/platform/getProjectWallet`
-                    body['companyName'] = this.props.companyName;
+                    body['companyUID'] = this.props.companyUID;
                     body['projectName'] = this.props.projectName;
                 } else if (window.location.href.indexOf('/admin/investors/') > -1) {
                     url = `/api/v1/platform/getInvestorWallet`
-                    body['investorFullName'] = this.props.investorFullName;
+                    body['investorUID'] = this.props.investorUID;
                 }
                 break;
             default:

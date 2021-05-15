@@ -32,11 +32,11 @@ export const createWireframe = async () => {
 
 // ***** INVESTOR *****
 
-export const createInvestor = async (gateway, investorFullName) => {
+export const createInvestor = async (gateway, investorUID, investorFullName) => {
     try {
         const result = await sendTransaction(gateway, {
             name: 'createInvestor',
-            props: [investorFullName]
+            props: [investorUID, investorFullName]
         })
         gateway.disconnect()
         return result;
@@ -64,11 +64,11 @@ const getInvestorsData = async (req, res) => {
 
 // ***** VALIDATOR *****
 
-export const createValidator = async (gateway, validatorFullName) => {
+export const createValidator = async (gateway, validatorUID, validatorFullName) => {
     try {
         const result = await sendTransaction(gateway, {
             name: 'createValidator',
-            props: [validatorFullName]
+            props: [validatorUID, validatorFullName]
         })
         gateway.disconnect()
         return result;
@@ -99,11 +99,11 @@ const getValidatorsData = async (req, res) => {
 // ***** COMPANY *****
 
 
-export const createCompany = async (gateway, companyName) => {
+export const createCompany = async (gateway, companyUID, companyName) => {
     try {
         const result = await sendTransaction(gateway, {
             name: 'createCompany',
-            props: [companyName]
+            props: [companyUID, companyName]
         })
         gateway.disconnect()
         return result;
@@ -142,6 +142,7 @@ export const signInToPlatform = async (certificate, privateKey) => {
             props: []
         })
         gateway.disconnect()
+        console.log(result)
         return result;
     } catch (e) {
         console.log(e);
@@ -186,13 +187,13 @@ const getAllProjects = async (req, res) => {
 
 
 const depositInvestor = async (req, res) => {
-    const {certificate, privateKey, investorFullName, currency, amount} = req.body;
+    const {certificate, privateKey, investorUID, currency, amount} = req.body;
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'depositInvestor',
-            props: [investorFullName, currency, amount]
+            props: [investorUID, currency, amount]
         })
         gateway.disconnect()
         res.status(201).json({data: result})
@@ -202,14 +203,14 @@ const depositInvestor = async (req, res) => {
 };
 
 const depositCompanyProject = async (req, res) => {
-    const {certificate, privateKey, companyName, projectName, currency, amount} = req.body;
+    const {certificate, privateKey, companyUID, projectName, currency, amount} = req.body;
 
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'depositCompanyProject',
-            props: [companyName, projectName, currency, amount]
+            props: [companyUID, projectName, currency, amount]
         })
         gateway.disconnect()
         res.status(201).json({data: result})
@@ -220,14 +221,14 @@ const depositCompanyProject = async (req, res) => {
 
 
 const getInvestorWallet = async (req, res) => {
-    let {certificate, privateKey, investorFullName} = req.body;
-    investorFullName = investorFullName || "";
+    let {certificate, privateKey, investorUID} = req.body;
+    investorUID = investorUID || "";
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getInvestorWallet',
-            props: [investorFullName]
+            props: [investorUID]
         })
         gateway.disconnect()
         res.status(201).json(result)
@@ -238,14 +239,14 @@ const getInvestorWallet = async (req, res) => {
 
 
 const getValidatorWallet = async (req, res) => {
-    let {certificate, privateKey, validatorFullName} = req.body;
-    validatorFullName = validatorFullName || ""
+    let {certificate, privateKey, validatorUID} = req.body;
+    validatorUID = validatorUID || ""
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getValidatorWallet',
-            props: [validatorFullName]
+            props: [validatorUID]
         })
         gateway.disconnect()
         res.status(201).json(result)
@@ -256,14 +257,14 @@ const getValidatorWallet = async (req, res) => {
 
 
 const getValidatorApprovals = async (req, res) => {
-    let {certificate, privateKey, validatorFullName} = req.body;
-    validatorFullName = validatorFullName || "";
+    let {certificate, privateKey, validatorUID} = req.body;
+    validatorUID = validatorUID || "";
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getValidatorApprovals',
-            props: [validatorFullName]
+            props: [validatorUID]
         })
         gateway.disconnect()
         res.status(201).json(result)
@@ -274,14 +275,14 @@ const getValidatorApprovals = async (req, res) => {
 
 
 const getProjectWallet = async (req, res) => {
-    let {certificate, privateKey, projectName, companyName} = req.body;
-    companyName = companyName || ""
+    let {certificate, privateKey, projectName, companyUID} = req.body;
+    companyUID = companyUID || ""
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getProjectWallet',
-            props: [projectName, companyName]
+            props: [projectName, companyUID]
         })
         gateway.disconnect()
         res.status(201).json(result)
@@ -292,14 +293,14 @@ const getProjectWallet = async (req, res) => {
 
 
 const getProject = async (req, res) => {
-    let {certificate, privateKey, projectName, companyName} = req.body;
-    companyName = companyName || ""
+    let {certificate, privateKey, projectName, companyUID} = req.body;
+    companyUID = companyUID || ""
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getProject',
-            props: [projectName, companyName]
+            props: [projectName, companyUID]
         })
         gateway.disconnect()
         res.status(201).json(result)
@@ -310,14 +311,14 @@ const getProject = async (req, res) => {
 
 
 const approveProject = async (req, res) => {
-    let {certificate, privateKey, projectName, companyName} = req.body;
+    let {certificate, privateKey, projectName, companyUID} = req.body;
 
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'approveProject',
-            props: [projectName, companyName]
+            props: [projectName, companyUID]
         })
         gateway.disconnect()
         res.status(201).json(result)
@@ -364,14 +365,14 @@ const getValidators = async (req, res) => {
 
 
 const investToProject = async (req, res) => {
-    let {certificate, privateKey, investorFullName, companyName, projectName, currency, amount} = req.body;
+    let {certificate, privateKey, companyUID, projectName, currency, amount} = req.body;
 
     try {
         const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'investToProject',
-            props: [investorFullName, companyName, projectName, currency, amount]
+            props: [companyUID, projectName, currency, amount]
         })
         gateway.disconnect()
         //res.status(201).json(result)
@@ -395,8 +396,8 @@ const investToProject = async (req, res) => {
         context.fillStyle = '#fff'
 
         const text = "This certificate approves that";
-        const text2 = `${investorFullName} successfully invested ${amount}${currency} in ${companyName}, ${projectName}`;
-        const text3 = `Transaction ID: ${result.data}`;
+        const text2 = `${result.investorFullName} successfully invested ${amount}${currency} in ${result.companyName}, ${projectName}`;
+        const text3 = `Transaction ID: ${result.transactionId}`;
 
         context.fillText(text, 600, 170)
         context.fillText(text2, 600, 200)

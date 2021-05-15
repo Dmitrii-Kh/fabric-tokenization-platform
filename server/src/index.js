@@ -95,7 +95,7 @@ app.post('/uploadDocs', (req, res) => {
 
 
 app.post('/getDocs', (req, res) => {
-    let upload_path = path.join(__dirname, `../docs/${req.body.companyName}/${req.body.projectName}/`);
+    let upload_path = path.join(__dirname, `../docs/${req.body.companyUID}/${req.body.projectName}/`);
     res.download(upload_path + 'projectDocs.pdf');
 });
 

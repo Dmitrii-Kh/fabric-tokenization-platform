@@ -4,13 +4,13 @@ class ValidatorDetailed extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            validatorFullName: undefined
+            validatorUID: undefined
         };
 
     }
 
     handleChange(val) {
-        this.setState({validatorFullName: val});
+        this.setState({validatorUID: val});
     }
 
 
@@ -20,11 +20,11 @@ class ValidatorDetailed extends React.Component {
 
 
     render() {
-        if (this.state.validatorFullName) {
+        if (this.state.validatorUID) {
             return (
                 <div className="validator-detailed-container">
                    <ApprovedProjects
-                       validatorFullName = { this.state.validatorFullName }
+                       validatorUID = { this.state.validatorUID }
                    />
                 </div>
             );

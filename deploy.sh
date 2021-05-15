@@ -31,7 +31,7 @@ peer channel join -b testchannel.block
 #peer chaincode invoke -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n recordcontract --peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt -c '{"Args":["createStudentRecord"]}'
 #peer chaincode query -C $CHANNEL_NAME -n recordcontract -c '{"Args":["createStudentRecord"]}'
 ##Update chaincode - Change version
-#peer chaincode install -n tokenizationcontract -v 1.1 -l node -p /opt/gopath/src/github.com/chaincode
+#peer chaincode install -n tokenizationcontract -v 8.2 -l node -p /opt/gopath/src/github.com/chaincode
 #
-#peer chaincode upgrade -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n tokenizationcontract -l node -v 1.1 -c '{"Args":[]}'
+#peer chaincode upgrade -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n tokenizationcontract -l node -v 8.4 -c '{"Args":[]}'
 
