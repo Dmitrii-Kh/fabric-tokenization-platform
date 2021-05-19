@@ -5,6 +5,15 @@ const {ClientIdentity} = require('fabric-shim');
 const VALIDATOR_FEE = 250;
 const VALIDATOR_FEE_CURRENCY = "USDT";
 
+const COMPANIES_COLLECTION = "companies";
+const INVESTORS_COLLECTION = "investors";
+const VALIDATORS_COLLECTION = "validators";
+
+const UNIT_COMPANY = "company";
+const UNIT_VALIDATOR = "validator";
+const UNIT_INVESTOR = "investor";
+
+
 class TokenizationPlatformStorage extends Contract {
     constructor() {
         super('org.fabric.tokenizationPlatformStorage');
@@ -724,6 +733,27 @@ class TokenizationPlatformStorage extends Contract {
 
 
         return JSON.stringify([{currencyName: 'USDT', amount: result}], null, 2);
+    }
+
+    async getInvestmentHistory(ctx) {
+        const identity = new ClientIdentity(ctx.stub);
+        if (identity.cert.subject.organizationalUnitName !== 'company') {
+            throw new Error('Current subject does not have access to this function');
+        }
+
+        const companiesAsBytes = await ctx.stub.getState(COMPANIES_COLLECTION);
+        const companiesAsObject = JSON.parse(companiesAsBytes.toString());
+
+        let result = [];
+        companiesAsObject[identity.cert.subject.commonName].projects.forEach(pr => {
+            if(!!pr.investmentHistory) {
+                pr.investmentHistory.forEach(rec => {
+                    result.push(rec);
+                })
+            }
+        })
+
+        return JSON.stringify(result, null, 2);
     }
 
 

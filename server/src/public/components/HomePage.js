@@ -9,6 +9,7 @@ function HomePage() {
                 </div>
             </div>
             <ApprovedProjects/>
+            <InvestmentHistory/>
         </div>
     )
 

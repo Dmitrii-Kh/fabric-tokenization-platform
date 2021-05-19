@@ -64,7 +64,7 @@ class ApprovedProjects extends React.Component {
                                         {new Date(Number(project.approvalDate)).toLocaleTimeString("en-US")}
                                     </span>
                                 </div>
-                                <div>Transaction ID: {project.transactionId}</div>
+                                <div className="transaction-id-div">Transaction ID: {project.transactionId}</div>
                             </div>
                         ))}
                     </div>
