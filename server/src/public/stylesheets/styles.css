@@ -613,23 +613,23 @@ font-size: 20px
     text-align: center;
 }
 
-.approved-projects-container {
+.approved-projects-container, .invest-history-container {
     margin: 70px 0;
     text-align: center;
 }
 
-.approved-projects-container > h3{
+.approved-projects-container > h3, .invest-history-container > h3 {
     margin-bottom: 40px;
 }
 
-.approved-project {
+.approved-project, .invest-history-record {
     width: 100%;
     height: 100px;
     margin-bottom: 8px;
     padding: 10px 20px;
 }
 
-.approved-project-details {
+.approved-project-details, .invest-history-record-details {
     display: flex;
     justify-content: space-between;
     margin-bottom: 15px;
@@ -639,4 +639,8 @@ font-size: 20px
 .comp-proj-title {
     margin-top: 100px;
     margin-bottom: 60px;
+}
+
+.transaction-id-div {
+    text-align: start;
 }
