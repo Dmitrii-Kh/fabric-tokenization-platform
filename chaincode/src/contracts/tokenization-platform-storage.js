@@ -171,12 +171,7 @@ class TokenizationPlatformStorage extends Contract {
                 tokenName: tokenName,
                 priceInUSDT: priceInUSDT,
                 approved: "false",
-                wallet: [
-                    {
-                        currencyName: "USDT",
-                        amount: 500
-                    }
-                ]
+                wallet: []
             }
         );
 
