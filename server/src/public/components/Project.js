@@ -7,12 +7,18 @@ function CompanyName(props) {
 }
 
 function ApprovalInfo(props) {
-   if(sessionStorage.getItem('affiliation') !== 'investor') {
-       return (
-           <div className="approval-info">Project approved: <b>{props.approved.toString()}({props.approvedBy || "ValidatorName"})</b></div>
-       )
-   }
-   return <div className="approval-info">Approved by: <b>{props.approvedBy}</b></div>
+
+    switch (sessionStorage.getItem('affiliation')) {
+        case 'investor':
+            return <div className="approval-info">Approved by: <b>{props.approvedBy}</b></div>;
+        case 'validator':
+            return <span></span>
+        default:
+            if(props.approved === "true") {
+                return <div className="approval-info">Project approved: <b>{props.approved.toString()} ({props.approvedBy})</b></div>
+            }
+            return <div className="approval-info">Project approved: <b>{props.approved.toString()}</b></div>
+    }
 }
 
 const Project = (props) => {

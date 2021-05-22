@@ -68,8 +68,8 @@
                 } else {
                     const linkCert = document.createElement('a');
                     const linkKey = document.createElement('a');
-                    linkCert.setAttribute('download', 'cert.txt');
-                    linkKey.setAttribute('download', 'privateKey.txt');
+                    linkCert.setAttribute('download', `cert(${login}).txt`);
+                    linkKey.setAttribute('download', `privateKey(${login}).txt`);
                     linkCert.href = makeTextFile(responseObj.certificate);
                     linkKey.href = makeTextFile(responseObj.privateKey);
                     document.body.appendChild(linkCert);

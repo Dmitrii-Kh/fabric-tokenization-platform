@@ -310,6 +310,10 @@ h4 {
     padding: 15px 50px;
 }
 
+.project-additional-info:nth-child(3){
+    margin-bottom: 35px;
+}
+
 .project-additional-info h4 {
     font-weight: 500 ;
 }
@@ -368,9 +372,7 @@ h4 {
     border: none;
 }
 
-.approval-info {
-    margin-bottom: 35px;
-}
+
 
 /* CREATING NEW PROJECT */
 .create-new-project-container {
@@ -504,7 +506,7 @@ h4 {
     font-size: 2rem;
 }
 
-.detailed-proj-btn {
+.detailed-proj-btn, .approve-project-btn {
     width: 250px;
     height: 60px;
     /*remove*/
@@ -516,7 +518,12 @@ h4 {
     border-radius: 5px;
 }
 
-.detailed-proj-btn:hover {
+.approve-project-btn {
+    margin-top: 50px;
+    width: 400px;
+}
+
+.detailed-proj-btn:hover, .approve-project-btn:hover {
     border-color: #f1f1f1;
     background: blue;
     color: #fff;
@@ -566,7 +573,9 @@ font-size: 20px
 
 .empty-portfolio-alert {
     text-align: center;
-    width: 100%;
+    width: 500px;
+    font-size: 22px;
+    margin-top: 10px;
 }
 
 
@@ -662,6 +671,7 @@ font-size: 20px
     text-align: center;
 }
 .please-wait {
+    margin-top: 20px;
     width: fit-content;
     text-align: center;
     position: relative;

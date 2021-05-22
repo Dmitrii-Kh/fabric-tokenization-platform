@@ -50,7 +50,7 @@ class ApprovedProjects extends React.Component {
         if (sessionStorage.getItem('affiliation') === 'validator' || sessionStorage.getItem('affiliation') === 'systemAdmin') {
             if (this.state.projects) {
                 if (this.state.projects.length === 0) {
-                    return <div className="no-projects-alert">No approved projects yet!</div>
+                    return <div className="no-projects-alert">No approved projects yet..</div>
                 }
 
                 return (
