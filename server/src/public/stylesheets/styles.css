@@ -492,6 +492,14 @@ h4 {
     margin-top: 35px;
 }
 
+.portfolio {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column nowrap;
+    width: 500px;
+}
+
 .portfolio h3 {
     font-size: 2rem;
 }
@@ -643,4 +651,46 @@ font-size: 20px
 
 .transaction-id-div {
     text-align: start;
+}
+
+.illustration {
+    position: absolute;
+    left: 2%;
+}
+
+.loading-container {
+    text-align: center;
+}
+.please-wait {
+    width: fit-content;
+    text-align: center;
+    position: relative;
+    /*font-size: 2em;*/
+    color: #222;
+    text-transform: uppercase;
+    /*border-bottom: 4px solid #222;*/
+    /*letter-spacing: 0.05em;*/
+    /*line-height: 0.8em;*/
+}
+
+.please-wait:before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: #03a9f4;
+    overflow: hidden;
+    /*border-bottom: 4px solid #03a9f4;*/
+    animation: animate 2s linear infinite;
+}
+
+@keyframes animate {
+    0% {
+        width: 0;
+    }
+    100%
+    {
+        width: 100%;
+    }
 }
