@@ -2,7 +2,7 @@
 function AddProjectMenu() {
     if(sessionStorage.getItem('affiliation') === 'company') {
         return (
-            <div className="create-new-project-container">
+            <div id="create-new-proj" className="create-new-project-container">
                 <button className="collapsible" onClick={ () => {
                     document.getElementsByClassName("collapsible")[0].classList.toggle("active");
                     const content = document.getElementsByClassName("collapsible-project-adding")[0];
@@ -209,7 +209,7 @@ class Projects extends React.Component {
 
             );
         } else {
-            return <div>Please wait</div>;
+            return <div data-text="Please&nbsp;wait..." className="please-wait">Please&nbsp;wait...</div>;
         }
     }
 }

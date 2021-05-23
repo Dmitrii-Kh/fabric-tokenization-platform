@@ -50,7 +50,7 @@ class InvestmentHistory extends React.Component {
         if (sessionStorage.getItem('affiliation') === 'company') {
             if (this.state.records) {
                 if (this.state.records.length === 0) {
-                    return <div className="no-projects-alert">No approved projects yet!</div>
+                    return <div className="no-projects-alert">No investments yet..</div>
                 }
 
                 return (
@@ -73,7 +73,7 @@ class InvestmentHistory extends React.Component {
                 );
 
             } else {
-                return <div>Please wait</div>;
+                return <div data-text="Please&nbsp;wait..." className="please-wait">Please&nbsp;wait...</div>;
             }
         } else {
             return <span></span>

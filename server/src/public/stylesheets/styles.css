@@ -44,6 +44,18 @@ body {
 }
 
 
+.register-form a {
+    display: block;
+    margin-top: 25px;
+    font-size: 18px;
+    color: #b6b6b6;
+    text-decoration: none;
+}
+
+.register-form a:hover {
+    color: #fff;
+}
+
 input[type="text"] {
     width: 100%;
     margin-top: 15px;
@@ -262,6 +274,7 @@ h4 {
 .project {
     min-height: 300px;
     width: 100%;
+    min-width: 500px;
     margin-bottom: 30px;
     background-color: #fff;
     box-shadow: 0 0 15px 10px rgba(182, 182, 182, 0.2);
@@ -294,11 +307,12 @@ h4 {
 
 .project-description {
     width: 100%;
-    height: 100px;
+    height: 95px;
     padding: 25px 50px;
     font-size: 15px;
     color: #0e0d0d;
     overflow: hidden;
+    font-size: 16px;
 }
 
 .project-additional-info {
@@ -308,6 +322,10 @@ h4 {
     color: #0e0d0d;
     margin-top: 10px;
     padding: 15px 50px;
+}
+
+.project-additional-info:nth-child(3){
+    margin-bottom: 35px;
 }
 
 .project-additional-info h4 {
@@ -349,6 +367,7 @@ h4 {
 
 .sort-bar {
     width: 100%;
+    min-width: 500px;
     height: 50px;
     background-color: #ececec;
     padding: 0 50px;
@@ -368,15 +387,17 @@ h4 {
     border: none;
 }
 
-.approval-info {
-    margin-bottom: 35px;
-}
+
 
 /* CREATING NEW PROJECT */
 .create-new-project-container {
     width: 100%;
     min-width: 500px;
     margin-top: 50px;
+}
+
+#create-new-proj {
+    min-width: 800px;
 }
 
 .projects-container .active, .project-detailed-container .active, .investor-detailed-container .active {
@@ -480,7 +501,9 @@ h4 {
     justify-content: center;
     align-items: center;
 }
+
 .deposit-project-btn {
+    margin-top: 50px;
     width: 500px;
 }
 
@@ -492,11 +515,19 @@ h4 {
     margin-top: 35px;
 }
 
+.portfolio {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column nowrap;
+    width: 500px;
+}
+
 .portfolio h3 {
     font-size: 2rem;
 }
 
-.detailed-proj-btn {
+.detailed-proj-btn, .approve-project-btn {
     width: 250px;
     height: 60px;
     /*remove*/
@@ -508,7 +539,12 @@ h4 {
     border-radius: 5px;
 }
 
-.detailed-proj-btn:hover {
+.approve-project-btn {
+    margin-top: 50px;
+    width: 400px;
+}
+
+.detailed-proj-btn:hover, .approve-project-btn:hover {
     border-color: #f1f1f1;
     background: blue;
     color: #fff;
@@ -558,7 +594,9 @@ font-size: 20px
 
 .empty-portfolio-alert {
     text-align: center;
-    width: 100%;
+    width: 500px;
+    font-size: 22px;
+    margin-top: 10px;
 }
 
 
@@ -643,4 +681,47 @@ font-size: 20px
 
 .transaction-id-div {
     text-align: start;
+}
+
+.illustration {
+    position: absolute;
+    left: 2%;
+}
+
+.loading-container {
+    text-align: center;
+}
+.please-wait {
+    margin-top: 20px;
+    width: fit-content;
+    text-align: center;
+    position: relative;
+    /*font-size: 2em;*/
+    color: #222;
+    text-transform: uppercase;
+    /*border-bottom: 4px solid #222;*/
+    /*letter-spacing: 0.05em;*/
+    /*line-height: 0.8em;*/
+}
+
+.please-wait:before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: #03a9f4;
+    overflow: hidden;
+    /*border-bottom: 4px solid #03a9f4;*/
+    animation: animate 2s linear infinite;
+}
+
+@keyframes animate {
+    0% {
+        width: 0;
+    }
+    100%
+    {
+        width: 100%;
+    }
 }

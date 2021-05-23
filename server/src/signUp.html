@@ -22,6 +22,8 @@
         <input type="radio" name="entity" id="company" value="company">
         <label for="company">Company</label><br><br>
         <button class="round-btn" type="submit" id="register-btn">Sign Up</button>
+        <br>
+        <a href="/signin">Sign In</a>
     </form>
 </div>
 <script type="text/javascript">
@@ -68,8 +70,8 @@
                 } else {
                     const linkCert = document.createElement('a');
                     const linkKey = document.createElement('a');
-                    linkCert.setAttribute('download', 'cert.txt');
-                    linkKey.setAttribute('download', 'privateKey.txt');
+                    linkCert.setAttribute('download', `cert(${login}).txt`);
+                    linkKey.setAttribute('download', `privateKey(${login}).txt`);
                     linkCert.href = makeTextFile(responseObj.certificate);
                     linkKey.href = makeTextFile(responseObj.privateKey);
                     document.body.appendChild(linkCert);

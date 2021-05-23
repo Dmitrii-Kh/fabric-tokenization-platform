@@ -131,7 +131,7 @@ class InvestorDetailed extends React.Component {
 
             );
         } else {
-            return <div>Please wait</div>;
+            return <div data-text="Please&nbsp;wait..." className="please-wait">Please&nbsp;wait...</div>;
         }
     }
 }

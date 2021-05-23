@@ -171,12 +171,7 @@ class TokenizationPlatformStorage extends Contract {
                 tokenName: tokenName,
                 priceInUSDT: priceInUSDT,
                 approved: "false",
-                wallet: [
-                    {
-                        currencyName: "USDT",
-                        amount: 500
-                    }
-                ]
+                wallet: []
             }
         );
 
@@ -406,10 +401,10 @@ class TokenizationPlatformStorage extends Contract {
         const validatorsAsBytes = await ctx.stub.getState("validators");
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
-            return JSON.stringify(validatorsAsObject[validatorUID].approvedProjects, null, 2);
+            return JSON.stringify(validatorsAsObject[validatorUID].approvedProjects || [], null, 2);
         }
         if (identity.cert.subject.organizationalUnitName === 'validator') {
-            return JSON.stringify(validatorsAsObject[identity.cert.subject.commonName].approvedProjects, null, 2);
+            return JSON.stringify(validatorsAsObject[identity.cert.subject.commonName].approvedProjects || [], null, 2);
         }
     }
 

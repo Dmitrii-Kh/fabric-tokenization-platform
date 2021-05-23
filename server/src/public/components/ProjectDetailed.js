@@ -2,7 +2,7 @@ function DepositProjectMenu(props) {
     //company only
     if (sessionStorage.getItem('affiliation') === 'company') {
         return (
-            <div className="create-new-project-container deposit-project-btn">
+            <div className="deposit-project-btn">
                 <button className="collapsible" onClick={() => {
                     document.getElementsByClassName("collapsible")[0].classList.toggle("active");
                     const content = document.getElementsByClassName("collapsible-project-adding")[0];
@@ -117,7 +117,7 @@ function DownloadDocsBtn(props) {
     }
 
         return (
-            <button className="detailed-proj-btn" onClick={async (e) => {
+            <button style={{visibility: `${props.downloadBtnVisibility}`}} className="detailed-proj-btn" onClick={async (e) => {
                 e.preventDefault();
                 const response = await fetch('/getDocs', {
                     method: 'POST',
@@ -166,7 +166,7 @@ function ApproveBtn(props) {
         };
         return (
 
-                <button className="detailed-proj-btn" onClick={async (e) => {
+                <button className="approve-project-btn" onClick={async (e) => {
                     e.preventDefault();
                     const response = await fetch('/api/v1/platform/approveProject', {
                         method: 'POST',
@@ -302,6 +302,7 @@ class ProjectDetailed extends React.Component {
         };
         this.pdfSrc = undefined;
         this.pdfVisibility = "hidden";
+        this.downloadBtnVisibility = "hidden";
     }
 
     handleChange(val) {
@@ -355,6 +356,7 @@ class ProjectDetailed extends React.Component {
         if(blob.size > 1000) {
             this.pdfSrc = window.URL.createObjectURL(blob);
             this.pdfVisibility = "visible";
+            this.downloadBtnVisibility = "visible";
         }
     }
 
@@ -399,6 +401,7 @@ class ProjectDetailed extends React.Component {
                     />
                     <div className="project-docs">
                         <DownloadDocsBtn
+                            downloadBtnVisibility = {this.downloadBtnVisibility}
                             projectName={this.state.project.projectName}
                             companyName={this.state.project.companyName}
                             companyUID={this.state.project.companyUID}
@@ -409,7 +412,7 @@ class ProjectDetailed extends React.Component {
 
             );
         } else {
-            return <div>Please wait</div>;
+            return <div data-text="Please&nbsp;wait..." className="please-wait">Please&nbsp;wait...</div>;
         }
     }
 }
