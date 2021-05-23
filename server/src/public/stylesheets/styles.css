@@ -44,6 +44,18 @@ body {
 }
 
 
+.register-form a {
+    display: block;
+    margin-top: 25px;
+    font-size: 18px;
+    color: #b6b6b6;
+    text-decoration: none;
+}
+
+.register-form a:hover {
+    color: #fff;
+}
+
 input[type="text"] {
     width: 100%;
     margin-top: 15px;
