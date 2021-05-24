@@ -16,12 +16,8 @@ class InvestmentHistory extends React.Component {
     loadPosts() {
         if(sessionStorage.getItem('affiliation') === 'company') {
             fetch("/api/v1/platform/getInvestmentHistory", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    certificate: sessionStorage.getItem('cert'),
-                    privateKey: sessionStorage.getItem('prKey')
-                })
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
             })
                 .then((res) => res.json())
                 .then((res) => {

@@ -5,6 +5,9 @@ import fs from "fs";
 
 const router = express.Router();
 
+const cookieParser = require('cookie-parser');
+router.use(cookieParser());
+
 
 export const createWireframe = async () => {
     try {
@@ -76,7 +79,6 @@ export const createValidator = async (gateway, validatorUID, validatorFullName) 
         console.log(e);
     }
 };
-
 
 //todo For testing purposes in postman, remove before production
 const getValidatorsData = async (req, res) => {
@@ -152,9 +154,9 @@ export const signInToPlatform = async (certificate, privateKey) => {
 // *************************************************
 
 const createNewProject = async (req, res) => {
-    const {certificate, privateKey, projectName, projectDescription, totalSupply, tokenName, priceInUSDT} = req.body;
+    const {projectName, projectDescription, totalSupply, tokenName, priceInUSDT} = req.body;
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'createNewProject',
@@ -169,9 +171,8 @@ const createNewProject = async (req, res) => {
 
 
 const getAllProjects = async (req, res) => {
-    const {certificate, privateKey} = req.body;
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getAllProjects',
@@ -187,9 +188,9 @@ const getAllProjects = async (req, res) => {
 
 
 const depositInvestor = async (req, res) => {
-    const {certificate, privateKey, investorUID, currency, amount} = req.body;
+    const {investorUID, currency, amount} = req.body;
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'depositInvestor',
@@ -203,10 +204,10 @@ const depositInvestor = async (req, res) => {
 };
 
 const depositCompanyProject = async (req, res) => {
-    const {certificate, privateKey, companyUID, projectName, currency, amount} = req.body;
+    const {companyUID, projectName, currency, amount} = req.body;
 
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'depositCompanyProject',
@@ -221,10 +222,10 @@ const depositCompanyProject = async (req, res) => {
 
 
 const getInvestorWallet = async (req, res) => {
-    let {certificate, privateKey, investorUID} = req.body;
+    let { investorUID } = req.body;
     investorUID = investorUID || "";
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getInvestorWallet',
@@ -239,10 +240,10 @@ const getInvestorWallet = async (req, res) => {
 
 
 const getValidatorWallet = async (req, res) => {
-    let {certificate, privateKey, validatorUID} = req.body;
+    let { validatorUID } = req.body;
     validatorUID = validatorUID || ""
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getValidatorWallet',
@@ -257,10 +258,10 @@ const getValidatorWallet = async (req, res) => {
 
 
 const getValidatorApprovals = async (req, res) => {
-    let {certificate, privateKey, validatorUID} = req.body;
+    let {validatorUID} = req.body;
     validatorUID = validatorUID || "";
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getValidatorApprovals',
@@ -275,10 +276,10 @@ const getValidatorApprovals = async (req, res) => {
 
 
 const getProjectWallet = async (req, res) => {
-    let {certificate, privateKey, projectName, companyUID} = req.body;
+    let {projectName, companyUID} = req.body;
     companyUID = companyUID || ""
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getProjectWallet',
@@ -293,10 +294,10 @@ const getProjectWallet = async (req, res) => {
 
 
 const getProject = async (req, res) => {
-    let {certificate, privateKey, projectName, companyUID} = req.body;
+    let {projectName, companyUID} = req.body;
     companyUID = companyUID || ""
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getProject',
@@ -311,10 +312,10 @@ const getProject = async (req, res) => {
 
 
 const approveProject = async (req, res) => {
-    let {certificate, privateKey, projectName, companyUID} = req.body;
+    let {projectName, companyUID} = req.body;
 
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'approveProject',
@@ -329,10 +330,9 @@ const approveProject = async (req, res) => {
 
 
 const getInvestors = async (req, res) => {
-    let {certificate, privateKey} = req.body;
 
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getInvestors',
@@ -347,10 +347,9 @@ const getInvestors = async (req, res) => {
 
 
 const getValidators = async (req, res) => {
-    let {certificate, privateKey} = req.body;
 
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getValidators',
@@ -365,18 +364,16 @@ const getValidators = async (req, res) => {
 
 
 const investToProject = async (req, res) => {
-    let {certificate, privateKey, companyUID, projectName, currency, amount} = req.body;
+    let {companyUID, projectName, currency, amount} = req.body;
 
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'investToProject',
             props: [companyUID, projectName, currency, amount]
         })
         gateway.disconnect()
-        //res.status(201).json(result)
-
 
         const { createCanvas, loadImage  } = require('canvas');
 
@@ -419,31 +416,6 @@ const investToProject = async (req, res) => {
             res.download("./investCert.jpeg");
         })
 
-        // context.drawImage(image, 0,0);
-        // context.fillStyle = "rgba(0, 0, 0, 0.4)";
-        // context.fillRect(0, 0, 1024, 683);
-        //
-        // context.font = 'bold 15pt Menlo'
-        // context.textAlign = 'center'
-        // context.textBaseline = 'top'
-        // context.fillStyle = '#ffffff'
-        //
-        // const text = "This certificate approves that";
-        // const text2 = `${result.investorFullName} successfully invested ${amount}${currency} in ${result.companyName}, ${projectName}`;
-        // const text3 = `Transaction ID: ${result.transactionId}`;
-        //
-        // context.fillText(text, 600, 170)
-        // context.fillText(text2, 600, 200)
-        // context.fillText(text3, 600, 260)
-        //
-        //
-        // context.font = 'bold 20pt Menlo'
-        // context.fillText('{tokenizationPlatformName}', 600, 530)
-        // const buffer = canvas.toBuffer('image/jpeg')
-        //
-        // fs.writeFileSync('./investCert.jpeg', buffer)
-        //
-        // res.download("./investCert.jpeg");
 
     } catch (e) {
         res.status(400).json({message: e.message});
@@ -452,9 +424,9 @@ const investToProject = async (req, res) => {
 
 
 const getCompanyTotalInvestments = async (req, res) => {
-    const {certificate, privateKey} = req.body;
+
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'companyTotalInvestments',
@@ -470,9 +442,9 @@ const getCompanyTotalInvestments = async (req, res) => {
 
 
 const getInvestmentHistory = async (req, res) => {
-    const {certificate, privateKey} = req.body;
+
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', certificate, privateKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getInvestmentHistory',
@@ -497,22 +469,22 @@ router.post('/getProjectWallet', getProjectWallet);
 router.post('/getProject', getProject);
 
 router.post('/createNewProject', createNewProject);
-router.post('/getAllProjects', getAllProjects);
+router.get('/getAllProjects', getAllProjects);
 
 router.post('/depositInvestor', depositInvestor);
 router.post('/depositCompanyProject', depositCompanyProject);
 
 router.post('/approveProject', approveProject);
 
-router.post('/getInvestors', getInvestors);
-router.post('/getValidators', getValidators);
+router.get('/getInvestors', getInvestors);
+router.get('/getValidators', getValidators);
 
 router.post('/investToProject', investToProject);
 
 router.post('/getValidatorApprovals', getValidatorApprovals);
 
 router.post('/getCompanyTotalInvestments', getCompanyTotalInvestments);
-router.post('/getInvestmentHistory', getInvestmentHistory);
+router.get('/getInvestmentHistory', getInvestmentHistory);
 
 
 export default router;

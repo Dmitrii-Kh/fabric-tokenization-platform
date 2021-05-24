@@ -68,9 +68,7 @@
                 alert(responseObj.message);
                 console.log(responseObj.message);
             } else {
-                //todo putItem to sessionStorage and redirect depending on affiliation
-                sessionStorage.setItem("cert", responseObj.certificate);
-                sessionStorage.setItem("prKey", responseObj.privateKey);
+                //putItem to sessionStorage and redirect depending on affiliation
                 sessionStorage.setItem("commonName", responseObj.commonName);
                 sessionStorage.setItem("fullName", responseObj.fullName);
                 sessionStorage.setItem("affiliation", responseObj.affiliation);

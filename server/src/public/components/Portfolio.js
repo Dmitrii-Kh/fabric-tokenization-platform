@@ -24,7 +24,7 @@ class Portfolio extends React.Component {
 
     loadPosts() {
         let url;
-        let body = {certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')};
+        let body = {};
         switch (sessionStorage.getItem('affiliation')) {
             case 'investor':
                 url = `/api/v1/platform/getInvestorWallet`
@@ -67,7 +67,7 @@ class Portfolio extends React.Component {
 
     componentDidMount() {
         this.loadPosts();
-        this.interval = setInterval(() => this.loadPosts(), 25000);
+        this.interval = setInterval(() => this.loadPosts(), 5000);
     }
 
     componentWillUnmount() {
@@ -88,7 +88,7 @@ class Portfolio extends React.Component {
                             </tr>
                             </tbody>
                         </table>
-                        <div className="empty-portfolio-alert">User's portfolio is empty</div>
+                        <div className="empty-portfolio-alert">Portfolio is empty</div>
                     </div>
                 )
             }
