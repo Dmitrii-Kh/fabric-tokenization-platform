@@ -5,6 +5,8 @@ import {createCompany, createInvestor, createValidator, signInToPlatform} from "
 
 const router = express.Router();
 
+const cookieParser = require('cookie-parser');
+router.use(cookieParser());
 
 const investorRegistration = async (req, res) => {
   return registration(req, res, "investor");
@@ -73,11 +75,11 @@ const registration = async (req, res, affiliation) => {
 
 const signIn = async (req, res) => {
   const {certificate, privateKey} = req.body;
-  console.log(certificate)
-  console.log(privateKey)
   try {
     const userData = await signInToPlatform(certificate, privateKey);
-    console.log("Sign In Success");
+    res.cookie("cert", certificate, {httpOnly: true});
+    res.cookie("prKey", privateKey, {httpOnly: true});
+
     res.status(201).json({
       commonName: userData.commonName,
       fullName: userData.fullName,
@@ -89,6 +91,13 @@ const signIn = async (req, res) => {
     res.status(400).json({ message: e.message });
   }
 }
+
+
+router.get('/logout', (req, res)=>{
+  res.clearCookie('cert');
+  res.clearCookie('prKey');
+  res.send('user data deleted from cookie');
+});
 
 router.post('/signIn', signIn);
 router.post('/investor', investorRegistration);

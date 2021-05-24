@@ -27,8 +27,8 @@ function AddProjectMenu() {
                             const response = await fetch('/api/v1/platform/createNewProject', {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey'),
-                                    projectName: projectName, projectDescription: description, totalSupply: totalSupply, tokenName: tokenName, priceInUSDT: priceInUSDT})
+                                body: JSON.stringify({projectName: projectName, projectDescription: description,
+                                    totalSupply: totalSupply, tokenName: tokenName, priceInUSDT: priceInUSDT})
                             });
 
                             const responseObj = await response.json();
@@ -84,9 +84,8 @@ class Projects extends React.Component {
     loadPosts() {
 
             fetch("/api/v1/platform/getAllProjects", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')})
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
             })
                 .then((res) => res.json())
                 .then((res) => {

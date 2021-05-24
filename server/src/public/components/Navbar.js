@@ -4,6 +4,10 @@ function LogOut() {
             <nav>
                 <a href="/signin" onClick={() => {
                     sessionStorage.clear();
+                    const response = fetch('/api/v1/auth/logout', {
+                        method: 'GET',
+                        headers: {'Content-Type': 'application/json'}
+                    });
                 }}>Log out</a>
             </nav>
         )
@@ -57,7 +61,7 @@ function Navbar() {
                    <UserNav/>
                 </div>
                 <div id="registerMenu" className="register-menu">
-                    <h4 id="user-name">{sessionStorage.getItem('commonName')}<i className="fab fa-react"/></h4>
+                    <h4 id="user-name">{sessionStorage.getItem('fullName')}<i className="fab fa-react"/></h4>
                     <LogOut/>
                 </div>
             </div>

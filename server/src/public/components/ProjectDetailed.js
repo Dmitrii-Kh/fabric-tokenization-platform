@@ -23,8 +23,6 @@ function DepositProjectMenu(props) {
                             const depositAmount = document.getElementById("deposit-project-amount").value;
 
                             let body = {
-                                certificate: sessionStorage.getItem('cert'),
-                                privateKey: sessionStorage.getItem('prKey'),
                                 companyUID: props.companyUID,
                                 projectName: props.projectName,
                                 currency: depositCurrency,
@@ -72,7 +70,16 @@ function UploadDocsBtn(props) {
     //company
     if(sessionStorage.getItem('affiliation') === 'company') {
         return (
-            <form className="project-detailed-btn-container" method="post" action="/uploadDocs" encType="multipart/form-data">
+            <form id="upload-form" className="project-detailed-btn-container" encType="multipart/form-data" onSubmit={(e) => {
+                e.preventDefault();
+
+                let request = new XMLHttpRequest();
+
+                request.open('POST', "/uploadDocs", false);
+
+                const formData = new FormData(document.getElementById("upload-form"));
+                request.send(formData);
+            }}>
                 <label className="upload-docs-label" htmlFor="uploadDocs">Select Docs
                     <input type="file" id="uploadDocs" name="uploadDocs" placeholder="Docs"/>
                 </label>
@@ -80,7 +87,7 @@ function UploadDocsBtn(props) {
                        value={props.companyUID}/>
                 <input type="text" id="uploadDocsProject" style={{display: "none"}} name="uploadDocsProject"
                        value={props.projectName}/>
-                <input className="upload-download-input" type="submit" value="Upload"/>
+                <input className="upload-download-input" type="submit" value="Upload" />
             </form>
         )
     }
@@ -159,8 +166,6 @@ function ApproveBtn(props) {
     //validator
     if (sessionStorage.getItem("affiliation") === 'validator' && (props.approved === false || props.approved === "false")) {
         let body = {
-            certificate: sessionStorage.getItem('cert'),
-            privateKey: sessionStorage.getItem('prKey'),
             companyUID: props.companyUID,
             projectName: props.projectName
         };
@@ -216,8 +221,6 @@ function InvestMenu(props) {
 
 
                             let body = {
-                                certificate: sessionStorage.getItem('cert'),
-                                privateKey: sessionStorage.getItem('prKey'),
                                 companyUID: props.companyUID,
                                 projectName: props.projectName,
                                 currency: depositCurrency,
@@ -312,8 +315,6 @@ class ProjectDetailed extends React.Component {
 
     loadPosts() {
         let body = {
-            certificate: sessionStorage.getItem('cert'),
-            privateKey: sessionStorage.getItem('prKey'),
             projectName: window.location.href.split('/')[5]
         }
         if (sessionStorage.getItem('affiliation') !== 'company') {
@@ -337,26 +338,31 @@ class ProjectDetailed extends React.Component {
 
     async componentDidMount() {
         this.loadPosts();
-        this.interval = setInterval(() => this.loadPosts(), 4000);
+        this.interval = setInterval(() => { this.loadPosts(); this.loadDocs(); }, 4000);
 
         await this.loadDocs();
     }
 
 
     async loadDocs() {
-        const response = await fetch('/getDocs', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({companyUID: window.location.href.split('/')[4], projectName: window.location.href.split('/')[5]})
-        });
+        if(!this.pdfSrc ) {
+            const response = await fetch('/getDocs', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    companyUID: window.location.href.split('/')[4],
+                    projectName: window.location.href.split('/')[5]
+                })
+            });
 
-        const responseObj = await response.blob();
+            const responseObj = await response.blob();
 
-        let blob = new Blob([responseObj], {type: "application/pdf"});
-        if(blob.size > 1000) {
-            this.pdfSrc = window.URL.createObjectURL(blob);
-            this.pdfVisibility = "visible";
-            this.downloadBtnVisibility = "visible";
+            let blob = new Blob([responseObj], {type: "application/pdf"});
+            if (blob.size > 1000) {
+                this.pdfSrc = window.URL.createObjectURL(blob);
+                this.pdfVisibility = "visible";
+                this.downloadBtnVisibility = "visible";
+            }
         }
     }
 

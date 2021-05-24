@@ -14,7 +14,7 @@ class ApprovedProjects extends React.Component {
 
 
     loadPosts() {
-        let body = {certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')};
+        let body = {};
         if(sessionStorage.getItem('affiliation') === 'systemAdmin') {
             body["validatorUID"] = this.props.validatorUID;
         }
@@ -55,13 +55,12 @@ class ApprovedProjects extends React.Component {
 
                 return (
                     <div className="approved-projects-container">
-                        <h3>Approved projects by {this.props.validatorUID || window.location.href.split('/')[4]}: </h3>
+                        <h3>Approved projects by {window.sessionStorage.getItem('fullName') || window.location.href.split('/')[5]}: </h3>
                         {this.state.projects.map((project) => (
                             <div className="approved-project">
                                 <div className="approved-project-details">
                                     <span>{project.companyName}, {project.projectName}</span>
-                                    <span>{ new Date(Number(project.approvalDate)).toLocaleDateString("en-US")}
-                                        {new Date(Number(project.approvalDate)).toLocaleTimeString("en-US")}
+                                    <span>{ new Date(Number(project.approvalDate)).toLocaleDateString("en-US")} {new Date(Number(project.approvalDate)).toLocaleTimeString("en-US")}
                                     </span>
                                 </div>
                                 <div className="transaction-id-div">Transaction ID: {project.transactionId}</div>

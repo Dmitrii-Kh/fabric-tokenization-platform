@@ -17,9 +17,8 @@ class ValidatorsList extends React.Component {
     loadPosts() {
 
         fetch("/api/v1/platform/getValidators", {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')})
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
         })
             .then((res) => res.json())
             .then((res) => {

@@ -77,8 +77,8 @@ app.post('/uploadDocs', (req, res) => {
         if (!fs.existsSync(upload_path)){
             fs.mkdirSync(upload_path, {recursive: true});   //create directories if does not exist
         }
-        console.log(fields);
-        console.log(files);
+        // console.log(fields);
+        // console.log(files);
         // oldpath : temporary folder to which file is saved to
         let oldpath = files.uploadDocs.path;
         let newpath = upload_path + "projectDocs.pdf";
@@ -86,8 +86,8 @@ app.post('/uploadDocs', (req, res) => {
         fs.rename(oldpath, newpath, function (err) {
             if (err) throw err;
             // you may respond with another html page
-            res.write('<h1 style="text-align: center; width: 100%; margin-top: 45px;">File uploaded successfully!<h1>');
-            res.end();
+            // res.write('<h1 style="text-align: center; width: 100%; margin-top: 45px;">File uploaded successfully!<h1>');
+            res.send();
         });
     });
 

@@ -23,8 +23,6 @@ function DepositInvestorMenu(props) {
                             const depositAmount = document.getElementById("deposit-investor-amount").value;
 
                             let body = {
-                                certificate: sessionStorage.getItem('cert'),
-                                privateKey: sessionStorage.getItem('prKey'),
                                 investorUID: props.investorUID,
                                 currency: depositCurrency,
                                 amount: depositAmount
@@ -98,9 +96,8 @@ class InvestorDetailed extends React.Component {
     componentDidMount() {
         this.handleChange(window.location.href.split('/')[5]);
         fetch("/api/v1/platform/getAllProjects", {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({certificate: sessionStorage.getItem('cert'), privateKey: sessionStorage.getItem('prKey')})
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
         })
             .then((res) => res.json())
             .then((res) => {
@@ -114,9 +111,7 @@ class InvestorDetailed extends React.Component {
         if (this.state.investorUID && this.state.projects) {
 
             return (
-
                 <div className="investor-detailed-container">
-
                     <InvestorPortfolio
                         investorUID={this.state.investorUID}
                     />
@@ -126,9 +121,7 @@ class InvestorDetailed extends React.Component {
                         />
                     </div>
 
-
                 </div>
-
             );
         } else {
             return <div data-text="Please&nbsp;wait..." className="please-wait">Please&nbsp;wait...</div>;
