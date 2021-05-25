@@ -51,8 +51,10 @@ function DepositProjectMenu(props) {
                             console.log(e);
                         }
                     }}>
-                        <input type="text" id="deposit-project-currency" name="deposit-project-currency" min="0"
-                               placeholder="Currency " required/>
+                        <select id="deposit-project-currency" name="deposit-project-currency"
+                                placeholder="Token " required>
+                            <option value="USDT">USDT</option>
+                        </select>
                         <input type="number" id="deposit-project-amount" name="deposit-project-amount" min="0"
                                placeholder="Amount " step="0.01" required/>
 
