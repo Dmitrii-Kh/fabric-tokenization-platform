@@ -566,7 +566,15 @@ class TokenizationPlatformStorage extends Contract {
         const investorsAsBytes = await ctx.stub.getState("investors");
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
 
-        return JSON.stringify(Object.keys(investorsAsObject), null, 2);
+        let result = []
+        Object.keys(investorsAsObject).forEach(investorKey => {
+            result.push({
+                investorUID: investorKey,
+                investorFullName: investorsAsObject[investorKey].investorFullName
+            })
+        })
+
+        return JSON.stringify(result, null, 2);
     }
 
 
