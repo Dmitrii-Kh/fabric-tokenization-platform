@@ -161,7 +161,7 @@ class TokenizationPlatformStorage extends Contract {
         const companiesAsBytes = await ctx.stub.getState("companies");
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
 
-        //todo check whether this project already exists
+
         companiesAsObject[identity.cert.subject.commonName].projects.push(
             {
                 projectName: projectName,
@@ -198,7 +198,6 @@ class TokenizationPlatformStorage extends Contract {
         }
 
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
-            //todo check if no companies
             Object.entries(companiesAsObject).forEach(([key, value]) => {
                     if (value.projects.length === 0) return;
                     value.projects.forEach(project => {
@@ -215,7 +214,6 @@ class TokenizationPlatformStorage extends Contract {
         }
 
         if (identity.cert.subject.organizationalUnitName === 'investor') {
-            //todo check if no companies
             Object.entries(companiesAsObject).forEach(([key, value]) => {
                     if (value.projects.length === 0) return;
                     value.projects.forEach(project => {
@@ -235,7 +233,6 @@ class TokenizationPlatformStorage extends Contract {
         }
 
         if (identity.cert.subject.organizationalUnitName === 'validator') {
-            //todo check if no companies
             Object.entries(companiesAsObject).forEach(([key, value]) => {
                     if (value.projects.length === 0) return;
                     value.projects.forEach(project => {
@@ -265,7 +262,6 @@ class TokenizationPlatformStorage extends Contract {
         }
         const investorsAsBytes = await ctx.stub.getState("investors");
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
-        //todo check whether investor exists
 
         let wallet = investorsAsObject[investorUID].wallet;
         if (wallet.length === 0) {
@@ -293,7 +289,6 @@ class TokenizationPlatformStorage extends Contract {
         return JSON.stringify(investorsAsObject[investorUID], null, 2);
     }
 
-    //todo deposit validator
     async depositValidator(ctx, validatorUID, currency, amount) {
         const identity = new ClientIdentity(ctx.stub);
         // if (identity.cert.subject.organizationalUnitName !== 'systemAdmin') {
@@ -301,7 +296,6 @@ class TokenizationPlatformStorage extends Contract {
         // }
         const validatorsAsBytes = await ctx.stub.getState("validators");
         const validatorsAsObject = JSON.parse(validatorsAsBytes.toString());
-        //todo check whether investor exists
 
         let wallet = validatorsAsObject[validatorUID].wallet;
         if (wallet.length === 0) {
@@ -414,7 +408,6 @@ class TokenizationPlatformStorage extends Contract {
         const companiesAsBytes = await ctx.stub.getState("companies");
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
         let result = [];
-        //todo into one function
         if (identity.cert.subject.organizationalUnitName === 'systemAdmin') {
             companiesAsObject[companyUID].projects.forEach(proj => {
                 if (proj.projectName === projectName) {
@@ -466,7 +459,6 @@ class TokenizationPlatformStorage extends Contract {
 
     }
 
-    //todo check returns for valid response
     async approveProject(ctx, projectName, companyUID) {
         const identity = new ClientIdentity(ctx.stub);
         if (identity.cert.subject.organizationalUnitName !== 'validator') {
@@ -596,12 +588,12 @@ class TokenizationPlatformStorage extends Contract {
 
     async investToProject(ctx, companyUID, projectName, currency, amount) {
         const identity = new ClientIdentity(ctx.stub);
-        if (identity.cert.subject.organizationalUnitName !== 'investor') {
+        if (identity.cert.subject.organizationalUnitName !== UNIT_INVESTOR) {
             throw new Error('Current subject does not have access to this function');
         }
         const investorUID = identity.cert.subject.commonName;
 
-        const investorsAsBytes = await ctx.stub.getState("investors");
+        const investorsAsBytes = await ctx.stub.getState(INVESTORS_COLLECTION);
         const investorsAsObject = JSON.parse(investorsAsBytes.toString());
         const investorFullName = investorsAsObject[investorUID].investorFullName;
         const investorWallet = investorsAsObject[investorUID].wallet;
@@ -609,7 +601,6 @@ class TokenizationPlatformStorage extends Contract {
 
         //withdraw investor's money
         if (investorWallet.length === 0) {
-            //todo send response
             throw new Error("Current investor's portfolio is empty");
         } else {
             let inArr = false;
@@ -636,7 +627,7 @@ class TokenizationPlatformStorage extends Contract {
 
         //check whether its possible to withdraw this amount from project
         //write this amount to [supply]
-        const companiesAsBytes = await ctx.stub.getState("companies");
+        const companiesAsBytes = await ctx.stub.getState(COMPANIES_COLLECTION);
         const companiesAsObject = JSON.parse(companiesAsBytes.toString());
 
 
@@ -710,8 +701,8 @@ class TokenizationPlatformStorage extends Contract {
             }
         });
 
-        await ctx.stub.putState("investors", Buffer.from(JSON.stringify(investorsAsObject)));
-        await ctx.stub.putState("companies", Buffer.from(JSON.stringify(companiesAsObject)));
+        await ctx.stub.putState(INVESTORS_COLLECTION, Buffer.from(JSON.stringify(investorsAsObject)));
+        await ctx.stub.putState(COMPANIES_COLLECTION, Buffer.from(JSON.stringify(companiesAsObject)));
 
         return JSON.stringify({investorFullName: investorFullName, companyName: companiesAsObject[companyUID].companyName, transactionId: ctx.stub.getTxID()}, null, 2);
     }
