@@ -46,8 +46,10 @@ function DepositInvestorMenu(props) {
                             console.log(e);
                         }
                     }}>
-                        <input type="text" id="deposit-investor-currency" name="deposit-investor-currency" min="0"
-                               placeholder="Currency " required/>
+                        <select id="deposit-investor-currency" name="deposit-investor-currency"
+                                placeholder="Token " required>
+                            <option value="USDT">USDT</option>
+                        </select>
                         <input type="number" id="deposit-investor-amount" name="deposit-investor-amount" min="0"
                                placeholder="Amount " step="0.01" required/>
 

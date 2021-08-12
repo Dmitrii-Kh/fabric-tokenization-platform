@@ -438,7 +438,7 @@ h4 {
     color: #181818;
 }
 
-.create-project-form input, #project-select, #withdraw-investor-currency {
+.create-project-form input, #project-select, #withdraw-investor-currency, #deposit-investor-currency, #deposit-project-currency {
     width: 100%;
     padding: 15px 25px;
     background-color: #f3f3f3;

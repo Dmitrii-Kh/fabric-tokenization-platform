@@ -47,7 +47,7 @@ class InvestorsList extends React.Component {
                 <div className="investors-container">
                     <h2>Investors: </h2>
                     {this.state.investors.map((investor) => (
-                        <a href={`/admin/investors/${investor}`}>{investor}</a>
+                        <a href={`/admin/investors/${investor.investorUID}`}>{investor.investorFullName} ({investor.investorUID})</a>
                     ))}
                 </div>
 
