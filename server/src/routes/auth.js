@@ -8,23 +8,23 @@ const router = express.Router();
 const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
-const investorRegistration = async (req, res) => {
-  return registration(req, res, "investor");
+const signUpInvestor = async (req, res) => {
+  return signUp(req, res, "investor");
 };
 
-const validatorRegistration = async (req, res) => {
-  return registration(req, res, "validator");
+const signUpValidator = async (req, res) => {
+  return signUp(req, res, "validator");
 };
 
-const companyRegistration = async (req, res) => {
-  return registration(req, res, "company");
+const signUpCompany = async (req, res) => {
+  return signUp(req, res, "company");
 };
 
-const adminRegistration = async (req, res) => {
-  return registration(req, res, "systemAdmin");
+const signUpAdmin = async (req, res) => {
+  return signUp(req, res, "systemAdmin");
 };
 
-const registration = async (req, res, affiliation) => {
+const signUp = async (req, res, affiliation) => {
   const { login, fullName, password } = req.body;
   try {
     const ca = getCA();
@@ -100,9 +100,9 @@ router.get('/logout', (req, res)=>{
 });
 
 router.post('/signIn', signIn);
-router.post('/investor', investorRegistration);
-router.post('/validator', validatorRegistration);
-router.post('/company', companyRegistration);
-router.post('/systemAdmin', adminRegistration);
+router.post('/investor', signUpInvestor);
+router.post('/validator', signUpValidator);
+router.post('/company', signUpCompany);
+router.post('/systemAdmin', signUpAdmin);
 
 export default router;
