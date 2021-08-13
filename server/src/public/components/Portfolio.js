@@ -104,7 +104,7 @@ class Portfolio extends React.Component {
                                 {this.state.wallet.map((record) => (
                                     <tr>
                                         <td>{record.currencyName}</td>
-                                        <td>{record.amount}</td>
+                                        <td>{parseFloat(record.amount.toFixed(5))}</td>
                                     </tr>
                                 ))}
                                 </tbody>
