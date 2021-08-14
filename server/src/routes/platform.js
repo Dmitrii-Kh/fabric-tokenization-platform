@@ -8,6 +8,18 @@ const router = express.Router();
 const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
+const CryptoJS = require("crypto-js");
+const AES_SECRET_KEY = "mySecretKey12332"
+const User = require("../model/user");
+const auth = require("../middleware/auth");
+
+const getUserKeys = async ({uid}) => {
+    let user = await User.findOne({uid: uid});
+    const certificate  = await CryptoJS.AES.decrypt(user.public_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+    const privateKey  = await CryptoJS.AES.decrypt(user.private_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+
+    return {certificate, privateKey};
+}
 
 export const createWireframe = async () => {
     try {
@@ -171,8 +183,9 @@ const createNewProject = async (req, res) => {
 
 
 const getAllProjects = async (req, res) => {
+    let {certificate: cert, privateKey: prKey} = await getUserKeys(req.user)
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', cert, prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getAllProjects',
@@ -222,10 +235,11 @@ const depositCompanyProject = async (req, res) => {
 
 
 const getInvestorWallet = async (req, res) => {
-    let { investorUID } = req.body;
-    investorUID = investorUID || "";
+    let {certificate: cert, privateKey: prKey} = await getUserKeys(req.user)
+    let {investorUID} = req.body;
+    investorUID = investorUID || ""
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', cert, prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getInvestorWallet',
@@ -294,10 +308,11 @@ const getProjectWallet = async (req, res) => {
 
 
 const getProject = async (req, res) => {
+    let {certificate: cert, privateKey: prKey} = await getUserKeys(req.user)
     let {projectName, companyUID} = req.body;
     companyUID = companyUID || ""
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', cert, prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'getProject',
@@ -365,9 +380,10 @@ const getValidators = async (req, res) => {
 
 const investToProject = async (req, res) => {
     let {companyUID, projectName, currency, amount} = req.body;
+    let {certificate: cert, privateKey: prKey} = await getUserKeys(req.user)
 
     try {
-        const mixin = X509WalletMixin.createIdentity('Org1MSP', req.cookies.cert, req.cookies.prKey)
+        const mixin = X509WalletMixin.createIdentity('Org1MSP', cert, prKey)
         const gateway = await getConnectedWallet('Org1MSP', mixin);
         const result = await sendTransaction(gateway, {
             name: 'investToProject',
@@ -462,14 +478,14 @@ router.get('/getInvestorsData', getInvestorsData);
 router.get('/getValidatorsData', getValidatorsData);
 router.get('/getCompaniesData', getCompaniesData);
 
-router.post('/getInvestorWallet', getInvestorWallet);
+router.post('/getInvestorWallet', auth, getInvestorWallet);
 router.post('/getValidatorWallet', getValidatorWallet);
 router.post('/getProjectWallet', getProjectWallet);
 
-router.post('/getProject', getProject);
+router.post('/getProject', auth, getProject);
 
 router.post('/createNewProject', createNewProject);
-router.get('/getAllProjects', getAllProjects);
+router.get('/getAllProjects', auth, getAllProjects);
 
 router.post('/depositInvestor', depositInvestor);
 router.post('/depositCompanyProject', depositCompanyProject);
@@ -479,7 +495,7 @@ router.post('/approveProject', approveProject);
 router.get('/getInvestors', getInvestors);
 router.get('/getValidators', getValidators);
 
-router.post('/investToProject', investToProject);
+router.post('/investToProject', auth, investToProject);
 
 router.post('/getValidatorApprovals', getValidatorApprovals);
 

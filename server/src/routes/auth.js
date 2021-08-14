@@ -8,7 +8,7 @@ const router = express.Router();
 const CryptoJS = require("crypto-js");
 
 const TOKEN_KEY = "mySecretKey"
-const AES_SECRET_KEY = "mySecretKey123321"
+const AES_SECRET_KEY = "mySecretKey12332"
 
 const cookieParser = require('cookie-parser');
 router.use(cookieParser());
@@ -133,14 +133,14 @@ const signIn = async (req, res) => {
       user.token = token;
 
       // get cert + private key
-      const certificate  = CryptoJS.AES.decrypt(user.public_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
-      const privateKey  = CryptoJS.AES.decrypt(user.private_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+      const certificate  = await CryptoJS.AES.decrypt(user.public_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+      const privateKey  = await CryptoJS.AES.decrypt(user.private_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
 
       const userData = await signInToPlatform(certificate, privateKey);
 
       res.cookie("x-access-token", token, {httpOnly: true});
-      res.cookie("cert", certificate, {httpOnly: true});
-      res.cookie("prKey", privateKey, {httpOnly: true});
+      // res.cookie("cert", certificate, {httpOnly: true});
+      // res.cookie("prKey", privateKey, {httpOnly: true});
 
       res.status(201).json({
         commonName: userData.commonName,
@@ -152,7 +152,7 @@ const signIn = async (req, res) => {
 
     }
 
-    res.status(400).send("Invalid Credentials");
+    res.status(400).json({ message: "Invalid Credentials!" });
   } catch (e) {
     res.status(400).json({ message: e.message });
   }

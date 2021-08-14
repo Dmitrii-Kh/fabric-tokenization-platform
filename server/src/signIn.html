@@ -12,14 +12,8 @@
 <div class="flex-container">
     <h1 class="get-tokenized">{Get Tokenized}</h1>
     <form class="register-form">
-        <label class="sign-in-label" for="cert">Certificate
-            <input type="file" id="cert" name="cert" placeholder="Certificate">
-        </label>
-        <br>
-        <label class="sign-in-label" for="prKey">Private Key
-            <input type="file" id="prKey" name="prKey" placeholder="Private Key">
-        </label>
-        <br><br>
+        <input type="text" id="login" name="login" placeholder="Login" required><br>
+        <input type="text" id="pass" name="password" placeholder="Password" required><br><br>
         <button class="round-btn" type="submit" id="login-btn">Sign In</button>
         <br>
         <a href="/signup">Sign Up</a>
@@ -27,40 +21,19 @@
 </div>
 <script type="text/javascript">
     const form = document.querySelector('.register-form');
-    let cert = "";
-    let prKey = "";
 
-    document.getElementById('cert')
-        .addEventListener('change', function () {
-            let fr = new FileReader();
-            fr.onload = function () {
-                cert = fr.result;
-                console.log(cert);
-            }
-            fr.readAsText(this.files[0]);
-        })
-
-    document.getElementById('prKey')
-        .addEventListener('change', function () {
-            let fr = new FileReader();
-            fr.onload = function () {
-                prKey = fr.result;
-                console.log(prKey);
-            }
-            fr.readAsText(this.files[0]);
-        })
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // const cert = form.login.value;
-        // const prKey = form.password.value;
+        const login = form.login.value;
+        const password = form.password.value;
 
         try {
             const response = await fetch(`/api/v1/auth/signIn`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({certificate: cert.toString(), privateKey: prKey.toString()})
+                body: JSON.stringify({login, password})
             });
 
             const responseObj = await response.json();
