@@ -51,21 +51,21 @@ const signUp = async (req, res, affiliation) => {
     const admin = await gateway.getCurrentIdentity()
     await registerUser(ca, admin, { login, password, affiliation: affiliation });
 
-    // //createEntity call
-    // if(affiliation === "investor") {
-    //   const res = await createInvestor(gateway, login, fullName);
-    //   console.log("Investor created: " + res);
-    // }
-    //
-    // if(affiliation === "validator") {
-    //   const res = await createValidator(gateway, login, fullName);
-    //   console.log("Validator created: " + res);
-    // }
-    //
-    // if(affiliation === "company") {
-    //   const res = await createCompany(gateway, login, fullName);
-    //   console.log("Company created: " + res);
-    // }
+    //createEntity call
+    if(affiliation === "investor") {
+      const res = await createInvestor(gateway, login, fullName);
+      console.log("Investor created: " + res);
+    }
+
+    if(affiliation === "validator") {
+      const res = await createValidator(gateway, login, fullName);
+      console.log("Validator created: " + res);
+    }
+
+    if(affiliation === "company") {
+      const res = await createCompany(gateway, login, fullName);
+      console.log("Company created: " + res);
+    }
 
 
     // Issue cert and prKey
@@ -79,15 +79,6 @@ const signUp = async (req, res, affiliation) => {
     const encryptedPublic = await CryptoJS.AES.encrypt(userData.certificate, AES_SECRET_KEY).toString();
     const encryptedPrivate =  await CryptoJS.AES.encrypt(userData.key.toBytes(), AES_SECRET_KEY).toString();
 
-    // Create user in our database
-    const user = await User.create({
-      uid: login,
-      password: encryptedPassword,
-      public_key: encryptedPublic,
-      private_key: encryptedPrivate,
-      token: ""
-    });
-
     // Create token
     const token = jwt.sign(
         { uid: login },
@@ -97,8 +88,19 @@ const signUp = async (req, res, affiliation) => {
         }
     );
 
+
+    // Create user in our database
+    const user = await User.create({
+      uid: login,
+      password: encryptedPassword,
+      public_key: encryptedPublic,
+      private_key: encryptedPrivate,
+      token: token
+    });
+
+
     // save user token
-    user.token = token;
+    // user.token = token;
 
     gateway.disconnect();
     console.log(userData.certificate);
@@ -113,19 +115,44 @@ const signUp = async (req, res, affiliation) => {
 
 
 const signIn = async (req, res) => {
-  const {certificate, privateKey} = req.body;
+  const {login, password} = req.body;
   try {
-    const userData = await signInToPlatform(certificate, privateKey);
-    res.cookie("cert", certificate, {httpOnly: true});
-    res.cookie("prKey", privateKey, {httpOnly: true});
+    const user = await User.findOne({ uid: login });
 
-    res.status(201).json({
-      commonName: userData.commonName,
-      fullName: userData.fullName,
-      affiliation: userData.affiliation,
-      certificate: certificate,
-      privateKey: privateKey,
-    });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      // Create token
+      const token = jwt.sign(
+          { uid: user.uid },
+          TOKEN_KEY,
+          {
+            expiresIn: "1h",
+          }
+      );
+
+      // save user token
+      user.token = token;
+
+      // get cert + private key
+      const certificate  = CryptoJS.AES.decrypt(user.public_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+      const privateKey  = CryptoJS.AES.decrypt(user.private_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+
+      const userData = await signInToPlatform(certificate, privateKey);
+
+      res.cookie("x-access-token", token, {httpOnly: true});
+      res.cookie("cert", certificate, {httpOnly: true});
+      res.cookie("prKey", privateKey, {httpOnly: true});
+
+      res.status(201).json({
+        commonName: userData.commonName,
+        fullName: userData.fullName,
+        affiliation: userData.affiliation,
+        certificate: certificate,
+        privateKey: privateKey,
+      });
+
+    }
+
+    res.status(400).send("Invalid Credentials");
   } catch (e) {
     res.status(400).json({ message: e.message });
   }
