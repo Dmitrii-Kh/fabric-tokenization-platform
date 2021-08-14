@@ -5,7 +5,10 @@ const path = require('path');
 const fs = require('fs');
 const formidable = require('formidable');
 const app = express();
+require("./config/database").connect();
+
 app.use(express.urlencoded());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, '/public')));
 
 
@@ -16,9 +19,10 @@ app.use(express.static(path.join(__dirname, '/public')));
 //     console.log(r.message)
 // });
 
-app.use(express.json());
+
 app.use('/api/v1/auth/', auth);
 app.use('/api/v1/platform/', platform);
+
 
 app.get('/signup', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'signUp.html'));
@@ -92,7 +96,6 @@ app.post('/uploadDocs', (req, res) => {
     });
 
 });
-
 
 app.post('/getDocs', (req, res) => {
     let upload_path = path.join(__dirname, `../docs/${req.body.companyUID}/${req.body.projectName}/`);
