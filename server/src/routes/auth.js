@@ -37,7 +37,7 @@ const signUp = async (req, res, affiliation) => {
     const oldUser = await User.findOne({ uid: login });
 
     if (oldUser) {
-      return res.status(409).send("User Already Exist. Please Login");
+      return res.status(409).json({ message: "User already exists! PLease login!" });
     }
 
     const ca = getCA();
