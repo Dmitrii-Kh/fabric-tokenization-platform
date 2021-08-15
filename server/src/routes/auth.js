@@ -157,8 +157,9 @@ const signIn = async (req, res) => {
 
 
 router.get('/logout', (req, res)=>{
-  res.clearCookie('cert');
-  res.clearCookie('prKey');
+  // res.clearCookie('cert');
+  // res.clearCookie('prKey');
+  res.clearCookie('x-access-token');
   res.send('user data deleted from cookie');
 });
 
