@@ -38,7 +38,7 @@ const signUp = async (req, res, affiliation) => {
     }
 
     const ca = getCA();
-    const adminData = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'password' });
+    const adminData = await ca.enroll({ enrollmentID: process.env.ADMIN_ENROLLMENT_ID, enrollmentSecret: process.env.ADMIN_ENROLLMENT_SECRET });
     const mixin = X509WalletMixin.createIdentity(
       'Org1MSP',
       adminData.certificate,
