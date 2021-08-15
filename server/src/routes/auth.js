@@ -7,9 +7,6 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 const CryptoJS = require("crypto-js");
 
-const TOKEN_KEY = "mySecretKey"
-const AES_SECRET_KEY = "mySecretKey12332"
-
 const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
@@ -76,13 +73,13 @@ const signUp = async (req, res, affiliation) => {
 
     //Encrypt user password
     const encryptedPassword = await bcrypt.hash(password, 10);
-    const encryptedPublic = await CryptoJS.AES.encrypt(userData.certificate, AES_SECRET_KEY).toString();
-    const encryptedPrivate =  await CryptoJS.AES.encrypt(userData.key.toBytes(), AES_SECRET_KEY).toString();
+    const encryptedPublic = await CryptoJS.AES.encrypt(userData.certificate, process.env.AES_SECRET_KEY).toString();
+    const encryptedPrivate =  await CryptoJS.AES.encrypt(userData.key.toBytes(), process.env.AES_SECRET_KEY).toString();
 
     // Create token
     const token = jwt.sign(
         { uid: login },
-        TOKEN_KEY,
+        process.env.TOKEN_KEY,
         {
           expiresIn: "1h",
         }
@@ -123,7 +120,7 @@ const signIn = async (req, res) => {
       // Create token
       const token = jwt.sign(
           { uid: user.uid },
-          TOKEN_KEY,
+          process.env.TOKEN_KEY,
           {
             expiresIn: "1h",
           }
@@ -133,8 +130,8 @@ const signIn = async (req, res) => {
       user.token = token;
 
       // get cert + private key
-      const certificate  = await CryptoJS.AES.decrypt(user.public_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
-      const privateKey  = await CryptoJS.AES.decrypt(user.private_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+      const certificate  = await CryptoJS.AES.decrypt(user.public_key, process.env.AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+      const privateKey  = await CryptoJS.AES.decrypt(user.private_key, process.env.AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
 
       const userData = await signInToPlatform(certificate, privateKey);
 

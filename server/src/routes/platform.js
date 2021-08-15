@@ -9,14 +9,13 @@ const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
 const CryptoJS = require("crypto-js");
-const AES_SECRET_KEY = "mySecretKey12332"
 const User = require("../model/user");
 const auth = require("../middleware/auth");
 
 const getUserKeys = async ({uid}) => {
     let user = await User.findOne({uid: uid});
-    const certificate  = await CryptoJS.AES.decrypt(user.public_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
-    const privateKey  = await CryptoJS.AES.decrypt(user.private_key, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+    const certificate  = await CryptoJS.AES.decrypt(user.public_key, process.env.AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+    const privateKey  = await CryptoJS.AES.decrypt(user.private_key, process.env.AES_SECRET_KEY).toString(CryptoJS.enc.Utf8);
 
     return {certificate, privateKey};
 }

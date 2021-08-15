@@ -6,6 +6,7 @@ const fs = require('fs');
 const formidable = require('formidable');
 const app = express();
 require("./config/database").connect();
+require("dotenv").config();
 
 app.use(express.urlencoded());
 app.use(express.json());
