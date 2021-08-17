@@ -2,15 +2,14 @@ import express from 'express';
 import {X509WalletMixin} from 'fabric-network';
 import {getCA, getConnectedWallet, sendTransaction} from '../utils';
 import fs from "fs";
+import CryptoJS from "crypto-js";
+import User from "../model/user";
+import auth from "../middleware/auth";
+import cookieParser from 'cookie-parser';
 
 const router = express.Router();
-
-const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
-const CryptoJS = require("crypto-js");
-const User = require("../model/user");
-const auth = require("../middleware/auth");
 
 const getUserKeys = async ({uid}) => {
     let user = await User.findOne({uid: uid});

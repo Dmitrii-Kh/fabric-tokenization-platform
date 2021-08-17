@@ -2,15 +2,15 @@ import express from 'express';
 import { X509WalletMixin } from 'fabric-network';
 import { getCA, getConnectedWallet, registerUser } from '../utils';
 import {createCompany, createInvestor, createValidator, signInToPlatform} from "./platform";
-const jwt = require("jsonwebtoken");
-const bcrypt = require('bcryptjs');
-const router = express.Router();
-const CryptoJS = require("crypto-js");
+import jwt from "jsonwebtoken";
+import bcrypt from 'bcryptjs';
+import CryptoJS from "crypto-js";
+import User from "../model/user";
+import cookieParser from 'cookie-parser';
 
-const cookieParser = require('cookie-parser');
+const router = express.Router();
 router.use(cookieParser());
 
-const User = require("../model/user");
 
 const signUpInvestor = async (req, res) => {
   return signUp(req, res, "investor");
@@ -39,6 +39,7 @@ const signUp = async (req, res, affiliation) => {
 
     const ca = getCA();
     const adminData = await ca.enroll({ enrollmentID: process.env.ADMIN_ENROLLMENT_ID, enrollmentSecret: process.env.ADMIN_ENROLLMENT_SECRET });
+
     const mixin = X509WalletMixin.createIdentity(
       'Org1MSP',
       adminData.certificate,
